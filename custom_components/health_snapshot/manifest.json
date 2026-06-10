@@ -1,0 +1,9 @@
+{
+  "domain": "health_snapshot",
+  "name": "Health Snapshot",
+  "version": "0.1.0",
+  "documentation": "https://github.com/Jocke1970/home-assistant-health-snapshot",
+  "requirements": [],
+  "codeowners": [],
+  "iot_class": "local_polling"
+}
