@@ -1,0 +1,1 @@
+"""Health Snapshot custom component."""
