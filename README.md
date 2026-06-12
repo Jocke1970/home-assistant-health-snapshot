@@ -15,18 +15,7 @@ sensor.health_snapshot_status
 sensor.health_snapshot_summary
 ```
 
-The summary sensor also exposes card-friendly attributes such as:
-
-```yaml
-training_readiness
-sleep_score
-hrv_status
-withings_weight
-withings_fat_percentage
-withings_visceral_fat
-withings_pwv
-withings_vascular_age
-```
+The summary sensor exposes card-friendly attributes, including Garmin readiness, sleep, HRV, SpO2 and Withings body metrics.
 
 ## Installation
 
@@ -58,6 +47,7 @@ Garmin:
 - recovery time
 - sleep need
 - deep/light/REM/awake sleep
+- average/latest/lowest SpO2
 - HRV last night + baseline
 - steps and distance
 - intensity minutes
