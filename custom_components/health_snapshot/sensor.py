@@ -81,6 +81,12 @@ def build_snapshot(hass: HomeAssistant) -> dict[str, Any]:
     awake = f(hass, "sensor.garmin_connect_awake_time")
     total_sleep = sum_known([deep, light, rem])
 
+    average_spo2 = f(hass, "sensor.average_spo2")
+    latest_spo2 = f(hass, "sensor.latest_spo2")
+    latest_spo2_time = s(hass, "sensor.latest_spo2_time")
+    lowest_spo2 = f(hass, "sensor.lowest_spo2")
+    oxygen_score = calc_oxygen_score(average_spo2, lowest_spo2)
+
     hrv_last = f(hass, "sensor.garmin_connect_hrv_last_night_average")
     hrv_base = f(hass, "sensor.garmin_connect_hrv_baseline")
 
@@ -100,16 +106,17 @@ def build_snapshot(hass: HomeAssistant) -> dict[str, Any]:
     withings_pulse = f(hass, "sensor.withings_hjartpuls")
     step_goal = f(hass, "sensor.withings_stegmal") or 5000
 
-    sleep_score = calc_sleep_score(total_sleep, sleep_need, awake)
+    sleep_score = calc_sleep_score(total_sleep, sleep_need, awake, lowest_spo2)
     hrv_score = calc_hrv_score(hrv_last, hrv_base)
     readiness = first([morning_readiness, training_readiness])
     recovery_time_score = calc_recovery_time_score(recovery_time_h)
 
     recovery_score = avg([
-        (readiness, 0.42),
-        (sleep_score, 0.28),
-        (hrv_score, 0.20),
+        (readiness, 0.38),
+        (sleep_score, 0.24),
+        (hrv_score, 0.18),
         (recovery_time_score, 0.10),
+        (oxygen_score, 0.10),
     ])
     activity_score = calc_activity_score(
         yesterday_steps,
@@ -123,15 +130,22 @@ def build_snapshot(hass: HomeAssistant) -> dict[str, Any]:
     body_score = calc_body_score(weight, weight_goal, fat, visceral, pwv, vascular_age)
     overall_score = avg([(recovery_score, 0.48), (activity_score, 0.27), (body_score, 0.25)])
     hrv_status = calc_hrv_status(hrv_last, hrv_base)
-    status = calc_status(overall_score, recovery_score, sleep_score, hrv_score, recovery_time_h)
-    summary = build_summary(status, overall_score, recovery_score, activity_score, body_score, sleep_score, total_sleep, sleep_need, hrv_status, training_status)
+    oxygen_status = calc_oxygen_status(average_spo2, lowest_spo2)
+    status = calc_status(overall_score, recovery_score, sleep_score, hrv_score, recovery_time_h, oxygen_score)
+    summary = build_summary(status, overall_score, recovery_score, activity_score, body_score, sleep_score, total_sleep, sleep_need, hrv_status, training_status, lowest_spo2, oxygen_status)
 
     attributes = {
         "body_battery": None,
         "training_readiness": r(training_readiness),
         "morning_training_readiness": r(morning_readiness),
         "sleep_score": r(sleep_score),
-        "sleep_score_source": "calculated_from_sleep_need",
+        "sleep_score_source": "calculated_from_sleep_need_spo2_adjusted",
+        "oxygen_score": r(oxygen_score),
+        "oxygen_status": oxygen_status,
+        "average_spo2": r(average_spo2, 1),
+        "latest_spo2": r(latest_spo2, 1),
+        "latest_spo2_time": latest_spo2_time,
+        "lowest_spo2": r(lowest_spo2, 1),
         "hrv_status": hrv_status,
         "resting_heart_rate": None,
         "stress_level": None,
@@ -156,7 +170,8 @@ def build_snapshot(hass: HomeAssistant) -> dict[str, Any]:
         "training_status": training_status,
         "data_quality": data_quality([
             training_readiness, morning_readiness, recovery_time_h, sleep_need, total_sleep,
-            hrv_last, hrv_base, yesterday_steps, weekly_steps, weight, fat, visceral, pwv, vascular_age,
+            average_spo2, latest_spo2, lowest_spo2, hrv_last, hrv_base, yesterday_steps,
+            weekly_steps, weight, fat, visceral, pwv, vascular_age,
         ]),
     }
 
@@ -215,7 +230,7 @@ def avg(items: list[tuple[float | None, float]]) -> float | None:
     return clamp(sum(value * weight for value, weight in usable) / total_weight)
 
 
-def calc_sleep_score(total_sleep: float | None, sleep_need: float | None, awake: float | None) -> float | None:
+def calc_sleep_score(total_sleep: float | None, sleep_need: float | None, awake: float | None, lowest_spo2: float | None) -> float | None:
     if total_sleep is None or sleep_need is None or sleep_need <= 0:
         return None
     score = clamp((total_sleep / sleep_need) * 100)
@@ -223,7 +238,55 @@ def calc_sleep_score(total_sleep: float | None, sleep_need: float | None, awake:
         score -= 10
     elif awake is not None and awake > 25:
         score -= 5
+    if lowest_spo2 is not None:
+        if lowest_spo2 < 88:
+            score -= 15
+        elif lowest_spo2 < 90:
+            score -= 10
+        elif lowest_spo2 < 92:
+            score -= 5
     return clamp(score)
+
+
+def calc_oxygen_score(average_spo2: float | None, lowest_spo2: float | None) -> float | None:
+    scores = []
+    if average_spo2 is not None:
+        if average_spo2 >= 96:
+            scores.append((95, 0.55))
+        elif average_spo2 >= 94:
+            scores.append((84, 0.55))
+        elif average_spo2 >= 92:
+            scores.append((68, 0.55))
+        elif average_spo2 >= 90:
+            scores.append((52, 0.55))
+        else:
+            scores.append((35, 0.55))
+    if lowest_spo2 is not None:
+        if lowest_spo2 >= 94:
+            scores.append((94, 0.45))
+        elif lowest_spo2 >= 92:
+            scores.append((82, 0.45))
+        elif lowest_spo2 >= 90:
+            scores.append((66, 0.45))
+        elif lowest_spo2 >= 88:
+            scores.append((48, 0.45))
+        else:
+            scores.append((30, 0.45))
+    return avg(scores)
+
+
+def calc_oxygen_status(average_spo2: float | None, lowest_spo2: float | None) -> str:
+    if average_spo2 is None and lowest_spo2 is None:
+        return "Saknas"
+    if lowest_spo2 is not None and lowest_spo2 < 90:
+        return "Låg lägstanivå"
+    if average_spo2 is not None and average_spo2 < 92:
+        return "Låg snittnivå"
+    if lowest_spo2 is not None and lowest_spo2 < 92:
+        return "Något låg lägstanivå"
+    if average_spo2 is not None and average_spo2 >= 96:
+        return "Bra"
+    return "Okej"
 
 
 def calc_hrv_score(last: float | None, baseline: float | None) -> float | None:
@@ -321,11 +384,13 @@ def calc_body_score(weight, goal, fat, visceral, pwv, vascular_age) -> float | N
     return avg([(weight_score, 0.20), (fat_score, 0.25), (visceral_score, 0.25), (pwv_score, 0.15), (vascular_score, 0.15)])
 
 
-def calc_status(overall, recovery, sleep, hrv, recovery_time) -> str:
+def calc_status(overall, recovery, sleep, hrv, recovery_time, oxygen) -> str:
     if overall is None:
         return "Unknown"
     if sleep is not None and sleep < 55:
         return "Poor sleep"
+    if oxygen is not None and oxygen < 50:
+        return "Recovery needed"
     if recovery is not None and recovery < 50:
         return "Recovery needed"
     if hrv is not None and hrv < 50:
@@ -356,7 +421,7 @@ def calc_hrv_status(last, baseline) -> str:
     return "Mycket låg"
 
 
-def build_summary(status, overall, recovery, activity, body, sleep, total_sleep, sleep_need, hrv_status, training_status) -> str:
+def build_summary(status, overall, recovery, activity, body, sleep, total_sleep, sleep_need, hrv_status, training_status, lowest_spo2, oxygen_status) -> str:
     if overall is None:
         return "Snapshot saknar tillräckligt med data just nu."
     status_sv = {
@@ -374,6 +439,8 @@ def build_summary(status, overall, recovery, activity, body, sleep, total_sleep,
     if sleep is not None and total_sleep is not None and sleep_need is not None:
         parts.append(f"sömn {round(total_sleep)}/{round(sleep_need)} min")
     parts.append(f"HRV: {hrv_status.lower()}")
+    if lowest_spo2 is not None:
+        parts.append(f"SpO2 lägst {round(lowest_spo2)}% ({oxygen_status.lower()})")
     if activity is not None:
         parts.append(f"aktivitet {round(activity)}%")
     if body is not None:
