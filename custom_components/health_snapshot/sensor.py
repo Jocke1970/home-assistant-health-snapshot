@@ -74,6 +74,11 @@ def build_snapshot(hass: HomeAssistant) -> dict[str, Any]:
     morning_readiness = f(hass, "sensor.garmin_connect_morning_training_readiness")
     recovery_time_h = f(hass, "sensor.garmin_connect_recovery_time")
 
+    body_battery = f(hass, "sensor.body_battery_most_recent")
+    resting_heart_rate = f(hass, "sensor.resting_heart_rate")
+    stress_level = f(hass, "sensor.avg_stress_level")
+    stress_score = calc_stress_score(stress_level)
+
     sleep_need = f(hass, "sensor.garmin_connect_sleep_need")
     deep = f(hass, "sensor.garmin_connect_deep_sleep")
     light = f(hass, "sensor.garmin_connect_light_sleep")
@@ -112,11 +117,13 @@ def build_snapshot(hass: HomeAssistant) -> dict[str, Any]:
     recovery_time_score = calc_recovery_time_score(recovery_time_h)
 
     recovery_score = avg([
-        (readiness, 0.38),
-        (sleep_score, 0.24),
-        (hrv_score, 0.18),
-        (recovery_time_score, 0.10),
-        (oxygen_score, 0.10),
+        (body_battery, 0.25),
+        (readiness, 0.25),
+        (sleep_score, 0.18),
+        (hrv_score, 0.14),
+        (stress_score, 0.10),
+        (oxygen_score, 0.08),
+        (recovery_time_score, 0.06),
     ])
     activity_score = calc_activity_score(
         yesterday_steps,
@@ -132,10 +139,25 @@ def build_snapshot(hass: HomeAssistant) -> dict[str, Any]:
     hrv_status = calc_hrv_status(hrv_last, hrv_base)
     oxygen_status = calc_oxygen_status(average_spo2, lowest_spo2)
     status = calc_status(overall_score, recovery_score, sleep_score, hrv_score, recovery_time_h, oxygen_score)
-    summary = build_summary(status, overall_score, recovery_score, activity_score, body_score, sleep_score, total_sleep, sleep_need, hrv_status, training_status, lowest_spo2, oxygen_status)
+    summary = build_summary(
+        status,
+        overall_score,
+        recovery_score,
+        activity_score,
+        body_score,
+        sleep_score,
+        total_sleep,
+        sleep_need,
+        hrv_status,
+        training_status,
+        lowest_spo2,
+        oxygen_status,
+        body_battery,
+        stress_level,
+    )
 
     attributes = {
-        "body_battery": None,
+        "body_battery": r(body_battery),
         "training_readiness": r(training_readiness),
         "morning_training_readiness": r(morning_readiness),
         "sleep_score": r(sleep_score),
@@ -147,8 +169,9 @@ def build_snapshot(hass: HomeAssistant) -> dict[str, Any]:
         "latest_spo2_time": latest_spo2_time,
         "lowest_spo2": r(lowest_spo2, 1),
         "hrv_status": hrv_status,
-        "resting_heart_rate": None,
-        "stress_level": None,
+        "resting_heart_rate": r(resting_heart_rate),
+        "stress_level": r(stress_level),
+        "stress_score": r(stress_score),
         "withings_weight": r(weight, 1),
         "withings_fat_percentage": r(fat, 1),
         "withings_visceral_fat": r(visceral, 1),
@@ -169,8 +192,9 @@ def build_snapshot(hass: HomeAssistant) -> dict[str, Any]:
         "intensity_minutes": r(intensity),
         "training_status": training_status,
         "data_quality": data_quality([
-            training_readiness, morning_readiness, recovery_time_h, sleep_need, total_sleep,
-            average_spo2, latest_spo2, lowest_spo2, hrv_last, hrv_base, yesterday_steps,
+            training_readiness, morning_readiness, recovery_time_h, body_battery,
+            resting_heart_rate, stress_level, sleep_need, total_sleep, average_spo2,
+            latest_spo2, lowest_spo2, hrv_last, hrv_base, yesterday_steps,
             weekly_steps, weight, fat, visceral, pwv, vascular_age,
         ]),
     }
@@ -304,6 +328,20 @@ def calc_hrv_score(last: float | None, baseline: float | None) -> float | None:
     return 40
 
 
+def calc_stress_score(stress_level: float | None) -> float | None:
+    if stress_level is None:
+        return None
+    if stress_level <= 15:
+        return 94
+    if stress_level <= 25:
+        return 84
+    if stress_level <= 35:
+        return 70
+    if stress_level <= 50:
+        return 52
+    return 35
+
+
 def calc_recovery_time_score(hours: float | None) -> float | None:
     if hours is None:
         return None
@@ -421,7 +459,7 @@ def calc_hrv_status(last, baseline) -> str:
     return "Mycket låg"
 
 
-def build_summary(status, overall, recovery, activity, body, sleep, total_sleep, sleep_need, hrv_status, training_status, lowest_spo2, oxygen_status) -> str:
+def build_summary(status, overall, recovery, activity, body, sleep, total_sleep, sleep_need, hrv_status, training_status, lowest_spo2, oxygen_status, body_battery, stress_level) -> str:
     if overall is None:
         return "Snapshot saknar tillräckligt med data just nu."
     status_sv = {
@@ -436,6 +474,10 @@ def build_summary(status, overall, recovery, activity, body, sleep, total_sleep,
     parts = [f"{status_sv}: overall {round(overall)}%."]
     if recovery is not None:
         parts.append(f"Recovery {round(recovery)}%")
+    if body_battery is not None:
+        parts.append(f"Body Battery {round(body_battery)}%")
+    if stress_level is not None:
+        parts.append(f"stress {round(stress_level)}")
     if sleep is not None and total_sleep is not None and sleep_need is not None:
         parts.append(f"sömn {round(total_sleep)}/{round(sleep_need)} min")
     parts.append(f"HRV: {hrv_status.lower()}")
