@@ -15,7 +15,7 @@ sensor.health_snapshot_status
 sensor.health_snapshot_summary
 ```
 
-The summary sensor exposes card-friendly attributes, including Garmin readiness, sleep, HRV, SpO2 and Withings body metrics.
+The summary sensor exposes card-friendly attributes, including Garmin readiness, Body Battery, resting heart rate, stress, sleep, HRV, SpO2 and Withings body metrics.
 
 ## Installation
 
@@ -42,6 +42,9 @@ Disable/remove any old template sensors using the same names before restart, oth
 
 Garmin:
 
+- Body Battery most recent
+- resting heart rate
+- average stress level
 - training readiness
 - morning training readiness
 - recovery time
