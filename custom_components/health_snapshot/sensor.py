@@ -70,38 +70,85 @@ class HealthSnapshotSensor(SensorEntity):
 
 def build_snapshot(hass: HomeAssistant) -> dict[str, Any]:
     """Build one complete snapshot from Garmin + Withings states."""
+
+    # Garmin readiness / recovery
     training_readiness = f(hass, "sensor.garmin_connect_training_readiness")
     morning_readiness = f(hass, "sensor.garmin_connect_morning_training_readiness")
     recovery_time_h = f(hass, "sensor.garmin_connect_recovery_time")
+    training_status = text(hass, "sensor.garmin_connect_training_status")
 
-    body_battery = f(hass, "sensor.body_battery_most_recent")
-    resting_heart_rate = f(hass, "sensor.resting_heart_rate")
-    stress_level = f(hass, "sensor.avg_stress_level")
+    # Garmin Body Battery / HR / stress, using fallback names from different integration versions.
+    body_battery = f_any(hass, ["sensor.body_battery_most_recent", "sensor.garmin_connect_body_battery"])
+    body_battery_highest = f_any(hass, ["sensor.body_battery_highest", "sensor.garmin_connect_body_battery_highest"])
+    body_battery_lowest = f_any(hass, ["sensor.body_battery_lowest", "sensor.garmin_connect_body_battery_lowest"])
+    body_battery_charged = f_any(hass, ["sensor.body_battery_charged", "sensor.garmin_connect_body_battery_charged"])
+    body_battery_drained = f_any(hass, ["sensor.body_battery_drained", "sensor.garmin_connect_body_battery_drained"])
+
+    resting_heart_rate = f_any(hass, ["sensor.resting_heart_rate", "sensor.garmin_connect_resting_heart_rate"])
+    avg_7d_resting_heart_rate = f_any(hass, ["sensor.last_7_days_avg_heart_rate", "sensor.garmin_connect_7_day_average_resting_heart_rate"])
+    max_heart_rate = f_any(hass, ["sensor.max_heart_rate", "sensor.garmin_connect_max_heart_rate"])
+    min_heart_rate = f_any(hass, ["sensor.min_heart_rate", "sensor.garmin_connect_min_heart_rate"])
+
+    stress_level = f_any(hass, ["sensor.avg_stress_level", "sensor.garmin_connect_average_stress_level"])
+    max_stress_level = f_any(hass, ["sensor.max_stress_level", "sensor.garmin_connect_max_stress_level"])
+    stress_percentage = f_any(hass, ["sensor.stress_percentage", "sensor.garmin_connect_stress_percentage"])
+    high_stress_percentage = f_any(hass, ["sensor.high_stress_percentage", "sensor.garmin_connect_high_stress_percentage"])
+    stress_qualifier = text_any(hass, ["sensor.stress_qualifier", "sensor.garmin_connect_stress_qualifier"])
     stress_score = calc_stress_score(stress_level)
 
+    # Garmin sleep
     sleep_need = f(hass, "sensor.garmin_connect_sleep_need")
     deep = f(hass, "sensor.garmin_connect_deep_sleep")
     light = f(hass, "sensor.garmin_connect_light_sleep")
     rem = f(hass, "sensor.garmin_connect_rem_sleep")
     awake = f(hass, "sensor.garmin_connect_awake_time")
+    nap = f(hass, "sensor.garmin_connect_nap_time")
     total_sleep = sum_known([deep, light, rem])
 
-    average_spo2 = f(hass, "sensor.average_spo2")
-    latest_spo2 = f(hass, "sensor.latest_spo2")
-    latest_spo2_time = s(hass, "sensor.latest_spo2_time")
-    lowest_spo2 = f(hass, "sensor.lowest_spo2")
+    # Garmin SpO2, using names exposed by the Garmin integration.
+    average_spo2 = f_any(hass, ["sensor.average_spo2", "sensor.garmin_connect_average_spo2"])
+    latest_spo2 = f_any(hass, ["sensor.latest_spo2", "sensor.garmin_connect_latest_spo2"])
+    latest_spo2_time = text_any(hass, ["sensor.latest_spo2_time", "sensor.garmin_connect_latest_spo2_time"])
+    lowest_spo2 = f_any(hass, ["sensor.lowest_spo2", "sensor.garmin_connect_lowest_spo2"])
     oxygen_score = calc_oxygen_score(average_spo2, lowest_spo2)
+    oxygen_status = calc_oxygen_status(average_spo2, lowest_spo2)
 
+    # Garmin HRV / fitness / hydration / blood pressure
+    hrv_weekly = f(hass, "sensor.garmin_connect_hrv_weekly_average")
     hrv_last = f(hass, "sensor.garmin_connect_hrv_last_night_average")
+    hrv_high = f(hass, "sensor.garmin_connect_hrv_last_night_5_min_high")
     hrv_base = f(hass, "sensor.garmin_connect_hrv_baseline")
 
+    vo2_max = f(hass, "sensor.garmin_connect_vo2_max")
+    endurance_score = f(hass, "sensor.garmin_connect_endurance_score")
+    chronological_age = f(hass, "sensor.garmin_connect_chronological_age")
+    fitness_age = f(hass, "sensor.garmin_connect_fitness_age")
+    achievable_fitness_age = f(hass, "sensor.garmin_connect_achievable_fitness_age")
+    previous_fitness_age = f(hass, "sensor.garmin_connect_previous_fitness_age")
+    fitness_age_delta = diff_or_none(chronological_age, fitness_age)
+
+    hydration = f(hass, "sensor.garmin_connect_hydration")
+    hydration_goal = f(hass, "sensor.garmin_connect_hydration_goal")
+    hydration_sweat_loss = f(hass, "sensor.garmin_connect_hydration_sweat_loss")
+    hydration_score = calc_hydration_score(hydration, hydration_goal)
+
+    bp_systolic = f(hass, "sensor.garmin_connect_blood_pressure_systolic")
+    bp_diastolic = f(hass, "sensor.garmin_connect_blood_pressure_diastolic")
+    bp_pulse = f(hass, "sensor.garmin_connect_blood_pressure_pulse")
+    bp_category = text(hass, "sensor.garmin_connect_blood_pressure_category")
+    bp_measurement_time = text(hass, "sensor.garmin_connect_blood_pressure_measurement_time")
+    bp_score = calc_blood_pressure_score(bp_systolic, bp_diastolic, bp_category)
+
+    # Garmin activity
     yesterday_steps = f(hass, "sensor.garmin_connect_yesterday_steps")
     weekly_steps = f(hass, "sensor.garmin_connect_weekly_step_average")
     intensity = f(hass, "sensor.garmin_connect_intensity_minutes")
     yesterday_distance = f(hass, "sensor.garmin_connect_yesterday_distance")
     weekly_distance = f(hass, "sensor.garmin_connect_weekly_distance_average")
-    training_status = s(hass, "sensor.garmin_connect_training_status")
+    power_to_weight = f(hass, "sensor.garmin_connect_power_to_weight_cycling")
+    ftp_cycling = f(hass, "sensor.garmin_connect_ftp_cycling")
 
+    # Withings body metrics
     weight = f(hass, "sensor.withings_vikt")
     weight_goal = f(hass, "sensor.withings_viktmal")
     fat = f(hass, "sensor.withings_fettforhallande")
@@ -117,14 +164,16 @@ def build_snapshot(hass: HomeAssistant) -> dict[str, Any]:
     recovery_time_score = calc_recovery_time_score(recovery_time_h)
 
     recovery_score = avg([
-        (body_battery, 0.25),
-        (readiness, 0.25),
-        (sleep_score, 0.18),
-        (hrv_score, 0.14),
+        (body_battery, 0.22),
+        (readiness, 0.22),
+        (sleep_score, 0.17),
+        (hrv_score, 0.13),
         (stress_score, 0.10),
-        (oxygen_score, 0.08),
+        (oxygen_score, 0.07),
         (recovery_time_score, 0.06),
+        (hydration_score, 0.03),
     ])
+
     activity_score = calc_activity_score(
         yesterday_steps,
         weekly_steps,
@@ -134,11 +183,21 @@ def build_snapshot(hass: HomeAssistant) -> dict[str, Any]:
         weekly_distance,
         training_status,
     )
-    body_score = calc_body_score(weight, weight_goal, fat, visceral, pwv, vascular_age)
+
+    body_score = calc_body_score(
+        weight,
+        weight_goal,
+        fat,
+        visceral,
+        pwv,
+        vascular_age,
+        bp_score,
+        hydration_score,
+    )
+
     overall_score = avg([(recovery_score, 0.48), (activity_score, 0.27), (body_score, 0.25)])
     hrv_status = calc_hrv_status(hrv_last, hrv_base)
-    oxygen_status = calc_oxygen_status(average_spo2, lowest_spo2)
-    status = calc_status(overall_score, recovery_score, sleep_score, hrv_score, recovery_time_h, oxygen_score)
+    status = calc_status(overall_score, recovery_score, sleep_score, hrv_score, recovery_time_h, oxygen_score, bp_score)
     summary = build_summary(
         status,
         overall_score,
@@ -154,14 +213,30 @@ def build_snapshot(hass: HomeAssistant) -> dict[str, Any]:
         oxygen_status,
         body_battery,
         stress_level,
+        bp_systolic,
+        bp_diastolic,
+        hydration_score,
     )
 
     attributes = {
         "body_battery": r(body_battery),
+        "body_battery_highest": r(body_battery_highest),
+        "body_battery_lowest": r(body_battery_lowest),
+        "body_battery_charged": r(body_battery_charged),
+        "body_battery_drained": r(body_battery_drained),
         "training_readiness": r(training_readiness),
         "morning_training_readiness": r(morning_readiness),
+        "recovery_time_h": r(recovery_time_h, 1),
+        "training_status": training_status,
         "sleep_score": r(sleep_score),
         "sleep_score_source": "calculated_from_sleep_need_spo2_adjusted",
+        "sleep_need_min": r(sleep_need),
+        "total_sleep_min": r(total_sleep),
+        "deep_sleep_min": r(deep),
+        "light_sleep_min": r(light),
+        "rem_sleep_min": r(rem),
+        "awake_time_min": r(awake),
+        "nap_time_min": r(nap),
         "oxygen_score": r(oxygen_score),
         "oxygen_status": oxygen_status,
         "average_spo2": r(average_spo2, 1),
@@ -169,33 +244,56 @@ def build_snapshot(hass: HomeAssistant) -> dict[str, Any]:
         "latest_spo2_time": latest_spo2_time,
         "lowest_spo2": r(lowest_spo2, 1),
         "hrv_status": hrv_status,
+        "hrv_weekly_average_ms": r(hrv_weekly),
+        "hrv_last_night_ms": r(hrv_last),
+        "hrv_last_night_5_min_high_ms": r(hrv_high),
+        "hrv_baseline_ms": r(hrv_base),
         "resting_heart_rate": r(resting_heart_rate),
+        "avg_7d_resting_heart_rate": r(avg_7d_resting_heart_rate),
+        "max_heart_rate": r(max_heart_rate),
+        "min_heart_rate": r(min_heart_rate),
         "stress_level": r(stress_level),
+        "max_stress_level": r(max_stress_level),
         "stress_score": r(stress_score),
+        "stress_percentage": r(stress_percentage, 1),
+        "high_stress_percentage": r(high_stress_percentage, 1),
+        "stress_qualifier": stress_qualifier,
+        "hydration": r(hydration),
+        "hydration_goal": r(hydration_goal),
+        "hydration_sweat_loss": r(hydration_sweat_loss),
+        "hydration_score": r(hydration_score),
+        "blood_pressure_systolic": r(bp_systolic),
+        "blood_pressure_diastolic": r(bp_diastolic),
+        "blood_pressure_pulse": r(bp_pulse),
+        "blood_pressure_category": bp_category,
+        "blood_pressure_measurement_time": bp_measurement_time,
+        "blood_pressure_score": r(bp_score),
+        "vo2_max": r(vo2_max, 1),
+        "endurance_score": r(endurance_score),
+        "chronological_age": r(chronological_age, 1),
+        "fitness_age": r(fitness_age, 1),
+        "achievable_fitness_age": r(achievable_fitness_age, 1),
+        "previous_fitness_age": r(previous_fitness_age, 1),
+        "fitness_age_delta": r(fitness_age_delta, 1),
+        "yesterday_steps": r(yesterday_steps),
+        "weekly_step_average": r(weekly_steps),
+        "yesterday_distance_m": r(yesterday_distance),
+        "weekly_distance_average_m": r(weekly_distance),
+        "intensity_minutes": r(intensity),
+        "power_to_weight_cycling": r(power_to_weight, 2),
+        "ftp_cycling": r(ftp_cycling),
         "withings_weight": r(weight, 1),
         "withings_fat_percentage": r(fat, 1),
         "withings_visceral_fat": r(visceral, 1),
         "withings_pwv": r(pwv, 2),
         "withings_vascular_age": r(vascular_age, 1),
         "withings_heart_pulse": r(withings_pulse),
-        "recovery_time_h": r(recovery_time_h, 1),
-        "sleep_need_min": r(sleep_need),
-        "total_sleep_min": r(total_sleep),
-        "deep_sleep_min": r(deep),
-        "light_sleep_min": r(light),
-        "rem_sleep_min": r(rem),
-        "awake_time_min": r(awake),
-        "hrv_last_night_ms": r(hrv_last),
-        "hrv_baseline_ms": r(hrv_base),
-        "yesterday_steps": r(yesterday_steps),
-        "weekly_step_average": r(weekly_steps),
-        "intensity_minutes": r(intensity),
-        "training_status": training_status,
         "data_quality": data_quality([
             training_readiness, morning_readiness, recovery_time_h, body_battery,
             resting_heart_rate, stress_level, sleep_need, total_sleep, average_spo2,
             latest_spo2, lowest_spo2, hrv_last, hrv_base, yesterday_steps,
-            weekly_steps, weight, fat, visceral, pwv, vascular_age,
+            weekly_steps, weight, fat, visceral, pwv, vascular_age, bp_systolic,
+            bp_diastolic, hydration, hydration_goal, vo2_max, fitness_age,
         ]),
     }
 
@@ -220,11 +318,27 @@ def f(hass: HomeAssistant, entity_id: str) -> float | None:
         return None
 
 
-def s(hass: HomeAssistant, entity_id: str) -> str | None:
+def f_any(hass: HomeAssistant, entity_ids: list[str]) -> float | None:
+    for entity_id in entity_ids:
+        value = f(hass, entity_id)
+        if value is not None:
+            return value
+    return None
+
+
+def text(hass: HomeAssistant, entity_id: str) -> str | None:
     state = hass.states.get(entity_id)
     if state is None or state.state in INVALID:
         return None
     return str(state.state)
+
+
+def text_any(hass: HomeAssistant, entity_ids: list[str]) -> str | None:
+    for entity_id in entity_ids:
+        value = text(hass, entity_id)
+        if value is not None:
+            return value
+    return None
 
 
 def first(values: list[float | None]) -> float | None:
@@ -234,6 +348,12 @@ def first(values: list[float | None]) -> float | None:
 def sum_known(values: list[float | None]) -> float | None:
     known = [value for value in values if value is not None]
     return sum(known) if known else None
+
+
+def diff_or_none(a: float | None, b: float | None) -> float | None:
+    if a is None or b is None:
+        return None
+    return a - b
 
 
 def clamp(value: float, low: float = 0, high: float = 100) -> float:
@@ -356,6 +476,34 @@ def calc_recovery_time_score(hours: float | None) -> float | None:
     return 25
 
 
+def calc_hydration_score(hydration: float | None, goal: float | None) -> float | None:
+    if hydration is None or goal is None or goal <= 0:
+        return None
+    return clamp((hydration / goal) * 100)
+
+
+def calc_blood_pressure_score(systolic: float | None, diastolic: float | None, category: str | None) -> float | None:
+    if category:
+        category_upper = category.upper()
+        if "NORMAL" in category_upper:
+            return 92
+        if "ELEVATED" in category_upper:
+            return 76
+        if "HIGH" in category_upper or "HYPERTENSION" in category_upper:
+            return 55
+        if "LOW" in category_upper:
+            return 65
+    if systolic is None or diastolic is None:
+        return None
+    if systolic < 120 and diastolic < 80:
+        return 92
+    if systolic < 130 and diastolic < 80:
+        return 76
+    if systolic < 140 or diastolic < 90:
+        return 62
+    return 45
+
+
 def calc_activity_score(steps, weekly_steps, step_goal, intensity, distance, weekly_distance, training_status) -> float | None:
     step_score = clamp((steps / step_goal) * 100) if steps is not None and step_goal else None
     trend_score = clamp((steps / weekly_steps) * 85) if steps is not None and weekly_steps else None
@@ -365,19 +513,19 @@ def calc_activity_score(steps, weekly_steps, step_goal, intensity, distance, wee
     if score is None:
         return None
     if training_status:
-        text = training_status.lower()
-        if "detraining" in text:
+        status = training_status.lower()
+        if "detraining" in status:
             score -= 6
-        elif "productive" in text:
+        elif "productive" in status:
             score += 5
-        elif "peaking" in text:
+        elif "peaking" in status:
             score += 4
-        elif "strained" in text:
+        elif "strained" in status:
             score -= 8
     return clamp(score)
 
 
-def calc_body_score(weight, goal, fat, visceral, pwv, vascular_age) -> float | None:
+def calc_body_score(weight, goal, fat, visceral, pwv, vascular_age, bp_score, hydration_score) -> float | None:
     weight_score = clamp(100 - abs(weight - goal) * 8) if weight is not None and goal is not None else None
     fat_score = None
     if fat is not None:
@@ -419,10 +567,18 @@ def calc_body_score(weight, goal, fat, visceral, pwv, vascular_age) -> float | N
             vascular_score = 62
         else:
             vascular_score = 45
-    return avg([(weight_score, 0.20), (fat_score, 0.25), (visceral_score, 0.25), (pwv_score, 0.15), (vascular_score, 0.15)])
+    return avg([
+        (weight_score, 0.18),
+        (fat_score, 0.22),
+        (visceral_score, 0.22),
+        (pwv_score, 0.12),
+        (vascular_score, 0.12),
+        (bp_score, 0.09),
+        (hydration_score, 0.05),
+    ])
 
 
-def calc_status(overall, recovery, sleep, hrv, recovery_time, oxygen) -> str:
+def calc_status(overall, recovery, sleep, hrv, recovery_time, oxygen, bp_score) -> str:
     if overall is None:
         return "Unknown"
     if sleep is not None and sleep < 55:
@@ -435,6 +591,8 @@ def calc_status(overall, recovery, sleep, hrv, recovery_time, oxygen) -> str:
         return "Recovery needed"
     if recovery_time is not None and recovery_time >= 36:
         return "Recovery needed"
+    if bp_score is not None and bp_score < 55:
+        return "Low"
     if overall >= 85:
         return "Excellent"
     if overall >= 70:
@@ -459,7 +617,7 @@ def calc_hrv_status(last, baseline) -> str:
     return "Mycket låg"
 
 
-def build_summary(status, overall, recovery, activity, body, sleep, total_sleep, sleep_need, hrv_status, training_status, lowest_spo2, oxygen_status, body_battery, stress_level) -> str:
+def build_summary(status, overall, recovery, activity, body, sleep, total_sleep, sleep_need, hrv_status, training_status, lowest_spo2, oxygen_status, body_battery, stress_level, bp_systolic, bp_diastolic, hydration_score) -> str:
     if overall is None:
         return "Snapshot saknar tillräckligt med data just nu."
     status_sv = {
@@ -483,6 +641,10 @@ def build_summary(status, overall, recovery, activity, body, sleep, total_sleep,
     parts.append(f"HRV: {hrv_status.lower()}")
     if lowest_spo2 is not None:
         parts.append(f"SpO2 lägst {round(lowest_spo2)}% ({oxygen_status.lower()})")
+    if bp_systolic is not None and bp_diastolic is not None:
+        parts.append(f"BT {round(bp_systolic)}/{round(bp_diastolic)}")
+    if hydration_score is not None:
+        parts.append(f"hydrering {round(hydration_score)}%")
     if activity is not None:
         parts.append(f"aktivitet {round(activity)}%")
     if body is not None:
