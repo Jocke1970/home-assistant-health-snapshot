@@ -15,7 +15,7 @@ sensor.health_snapshot_status
 sensor.health_snapshot_summary
 ```
 
-The summary sensor exposes card-friendly attributes, including Garmin readiness, Body Battery, resting heart rate, stress, sleep, HRV, SpO2 and Withings body metrics.
+The summary sensor exposes card-friendly attributes, including Garmin readiness, Body Battery, resting heart rate, stress, sleep, HRV, SpO2, blood pressure, hydration, VO2 max, fitness age and Withings body metrics.
 
 ## Installation
 
@@ -42,19 +42,19 @@ Disable/remove any old template sensors using the same names before restart, oth
 
 Garmin:
 
-- Body Battery most recent
-- resting heart rate
-- average stress level
-- training readiness
-- morning training readiness
-- recovery time
-- sleep need
-- deep/light/REM/awake sleep
+- Body Battery most recent/highest/lowest/charged/drained
+- resting heart rate and 7-day resting heart rate
+- average/max stress level and stress percentages
+- training readiness and morning training readiness
+- recovery time and training status
+- sleep need and deep/light/REM/awake sleep
 - average/latest/lowest SpO2
-- HRV last night + baseline
-- steps and distance
-- intensity minutes
-- training status
+- HRV weekly, last night, 5-minute high and baseline
+- hydration, hydration goal and sweat loss
+- blood pressure systolic/diastolic/pulse/category
+- VO2 max, endurance score, fitness age and chronological age
+- steps, distance and intensity minutes
+- cycling FTP and power-to-weight
 
 Withings:
 
@@ -69,4 +69,4 @@ Withings:
 
 ## Notes
 
-This is an early v0.1 backend. It is intentionally local, lightweight and YAML-platform based for easy Home Assistant testing.
+This is a v0.2 backend. It is intentionally local, lightweight and YAML-platform based for easy Home Assistant testing.
