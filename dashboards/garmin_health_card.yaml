@@ -1,0 +1,197 @@
+type: custom:vertical-stack-in-card
+cards:
+  - type: custom:button-card
+    entity: sensor.garmin_connect_training_readiness
+    name: Garmin Health
+    icon: mdi:watch-variant
+    show_state: false
+    show_label: true
+    label: |
+      [[[
+        const invalid = ['unknown','unavailable','none','None',''];
+        const n = (id) => { const s = states[id]?.state; const v = parseFloat(s); return s !== undefined && !invalid.includes(String(s)) && Number.isFinite(v) ? v : null; };
+        const raw = (id) => { const s = states[id]?.state; return s !== undefined && !invalid.includes(String(s)) ? s : '—'; };
+        const attr = (key) => { const s = states['sensor.health_snapshot_summary']; const v = s?.attributes?.[key]; return v !== undefined && !invalid.includes(String(v)) ? v : null; };
+        const nAttr = (key) => { const v = parseFloat(attr(key)); return Number.isFinite(v) ? v : null; };
+        const nAny = (...ids) => { for (const id of ids) { const v = n(id); if (v !== null) return v; } return null; };
+        const fmt = (v, unit = '', d = 0) => v === null ? '—' : `${v.toFixed(d)}${unit}`;
+
+        const readiness = n('sensor.garmin_connect_training_readiness');
+        const morningReadiness = n('sensor.garmin_connect_morning_training_readiness');
+        const bodyBattery = nAny('sensor.body_battery_most_recent', 'sensor.garmin_connect_body_battery') ?? nAttr('body_battery');
+        const sleepScore = nAttr('sleep_score');
+        const hrv = n('sensor.garmin_connect_hrv_last_night_average');
+        const hrvBase = n('sensor.garmin_connect_hrv_baseline');
+        const hrvStatus = attr('hrv_status') ?? '—';
+        const stress = nAny('sensor.avg_stress_level', 'sensor.garmin_connect_average_stress_level') ?? nAttr('stress_level');
+        const bpSys = n('sensor.garmin_connect_blood_pressure_systolic');
+        const bpDia = n('sensor.garmin_connect_blood_pressure_diastolic');
+        const bpCat = raw('sensor.garmin_connect_blood_pressure_category');
+        const hydration = n('sensor.garmin_connect_hydration');
+        const hydrationGoal = n('sensor.garmin_connect_hydration_goal');
+        const vo2 = n('sensor.garmin_connect_vo2_max');
+
+        let readinessText = 'Readiness saknas';
+        if (readiness !== null) {
+          if (readiness >= 75) readinessText = 'Redo för action';
+          else if (readiness >= 50) readinessText = 'Lagom redo';
+          else readinessText = 'Ta det lugnt';
+        }
+        let bbText = 'Body Battery saknas';
+        if (bodyBattery !== null) {
+          if (bodyBattery >= 70) bbText = 'Bra laddning';
+          else if (bodyBattery >= 40) bbText = 'Mellanläge';
+          else bbText = 'Låg energi';
+        }
+        const chip = (txt, accent) => `<span style="padding:6px 9px;border-radius:999px;background:rgba(${accent},.14);border:1px solid rgba(${accent},.24);font-size:11px;font-weight:950;color:rgba(245,250,255,.96);">${txt}</span>`;
+
+        return `
+          <div style="display:flex;flex-direction:column;gap:10px;width:100%;">
+            <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:14px;">
+              <div>
+                <div style="font-size:36px;font-weight:950;letter-spacing:-1.2px;line-height:1;color:white;">${fmt(readiness, '%')}</div>
+                <div style="font-size:12px;font-weight:850;color:rgba(255,255,255,.68);margin-top:6px;">Training readiness · ${readinessText}</div>
+              </div>
+              <div style="min-width:98px;padding:10px 12px;border-radius:18px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.12);text-align:right;box-shadow:inset 0 1px 0 rgba(255,255,255,.08);">
+                <div style="font-size:10px;text-transform:uppercase;letter-spacing:.9px;color:rgba(255,255,255,.55);font-weight:950;">Body Battery</div>
+                <div style="font-size:24px;font-weight:950;color:white;line-height:1.1;margin-top:2px;">${fmt(bodyBattery, '')}</div>
+                <div style="font-size:10px;color:rgba(255,255,255,.58);font-weight:850;">${bbText}</div>
+              </div>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:7px;">
+              ${chip('Sömn ' + fmt(sleepScore, ''), '80,180,255')}
+              ${chip('HRV ' + fmt(hrv, ' ms') + ' · ' + hrvStatus + (hrvBase !== null ? ' / baseline ' + hrvBase.toFixed(0) : ''), '80,255,190')}
+              ${chip('Stress ' + fmt(stress, ''), '255,190,80')}
+              ${chip('BT ' + (bpSys !== null && bpDia !== null ? bpSys.toFixed(0) + '/' + bpDia.toFixed(0) : '—') + ' · ' + bpCat, '255,90,120')}
+              ${chip('Hydrering ' + (hydration !== null && hydrationGoal !== null ? Math.round(hydration / hydrationGoal * 100) + '%' : '—'), '80,210,255')}
+              ${chip('VO₂max ' + fmt(vo2, '', 0), '190,130,255')}
+            </div>
+          </div>`;
+      ]]]
+    styles:
+      card:
+        - min-height: 190px
+        - padding: 20px
+        - border-radius: 28px 28px 0 0
+        - background: |
+            [[[
+              const r = parseFloat(states['sensor.garmin_connect_training_readiness']?.state);
+              const bb = parseFloat(states['sensor.body_battery_most_recent']?.state);
+              if (Number.isFinite(r) && r >= 75) return `radial-gradient(circle at 88% 12%, rgba(80,255,180,.30), transparent 34%),radial-gradient(circle at 8% 0%, rgba(80,170,255,.28), transparent 34%),linear-gradient(135deg, rgba(18,24,42,.98), rgba(6,8,18,.98))`;
+              if (Number.isFinite(bb) && bb < 40) return `radial-gradient(circle at 88% 12%, rgba(255,90,120,.30), transparent 34%),radial-gradient(circle at 8% 0%, rgba(80,170,255,.24), transparent 34%),linear-gradient(135deg, rgba(18,24,42,.98), rgba(6,8,18,.98))`;
+              return `radial-gradient(circle at 88% 12%, rgba(255,190,80,.26), transparent 34%),radial-gradient(circle at 8% 0%, rgba(80,170,255,.28), transparent 34%),linear-gradient(135deg, rgba(18,24,42,.98), rgba(6,8,18,.98))`;
+            ]]]
+        - border: 1px solid rgba(255,255,255,.13)
+        - box-shadow: 0 22px 52px rgba(0,0,0,.52)
+        - overflow: hidden
+      grid:
+        - grid-template-areas: '"i n" "i l"'
+        - grid-template-columns: 58px 1fr
+        - grid-template-rows: min-content 1fr
+      icon:
+        - width: 34px
+        - color: rgba(255,255,255,.96)
+      img_cell:
+        - width: 54px
+        - height: 54px
+        - border-radius: 20px
+        - background: rgba(255,255,255,.12)
+        - border: 1px solid rgba(255,255,255,.12)
+      name:
+        - justify-self: start
+        - font-size: 20px
+        - font-weight: 950
+        - color: white
+      label:
+        - justify-self: stretch
+        - text-align: left
+        - color: white
+        - white-space: normal
+
+  - type: custom:button-card
+    show_icon: false
+    show_name: false
+    show_state: false
+    styles:
+      card:
+        - padding: 14px
+        - border-radius: 0
+        - background: rgba(5,8,18,.94)
+        - box-shadow: none
+    custom_fields:
+      metrics: |
+        [[[
+          const invalid = ['unknown','unavailable','none','None',''];
+          const n = (id) => { const s = states[id]?.state; const v = parseFloat(s); return s !== undefined && !invalid.includes(String(s)) && Number.isFinite(v) ? v : null; };
+          const raw = (id) => { const s = states[id]?.state; return s !== undefined && !invalid.includes(String(s)) ? s : '—'; };
+          const attr = (key) => { const s = states['sensor.health_snapshot_summary']; const v = s?.attributes?.[key]; return v !== undefined && !invalid.includes(String(v)) ? v : null; };
+          const nAttr = (key) => { const v = parseFloat(attr(key)); return Number.isFinite(v) ? v : null; };
+          const nAny = (...ids) => { for (const id of ids) { const v = n(id); if (v !== null) return v; } return null; };
+          const fmt = (v, unit = '', d = 0) => v === null ? '—' : `${v.toFixed(d)}${unit}`;
+          const fmtId = (id, unit = '', d = 0) => fmt(n(id), unit, d);
+          const steps = n('sensor.garmin_connect_yesterday_steps');
+          const weeklySteps = n('sensor.garmin_connect_weekly_step_average');
+          const hydration = n('sensor.garmin_connect_hydration');
+          const hydrationGoal = n('sensor.garmin_connect_hydration_goal');
+
+          const kpi = (icon, title, value, sub, accent, glow = false) => `<div style="position:relative;min-height:96px;padding:14px;border-radius:22px;background:radial-gradient(circle at 88% 16%, rgba(${accent},.24), transparent 42%),linear-gradient(145deg, rgba(255,255,255,.078), rgba(255,255,255,.035));border:1px solid rgba(255,255,255,.105);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),${glow ? `0 0 22px rgba(${accent},.18)` : 'none'};overflow:hidden;"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><ha-icon icon="${icon}" style="width:18px;height:18px;color:rgba(255,255,255,.86);"></ha-icon><div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:rgba(255,255,255,.56);font-weight:950;">${title}</div></div><div style="font-size:22px;font-weight:950;color:white;line-height:1;">${value}</div><div style="font-size:11px;color:rgba(255,255,255,.58);margin-top:7px;font-weight:750;">${sub}</div></div>`;
+
+          return `<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;">
+            ${kpi('mdi:battery-heart', 'Body Battery', fmt(nAny('sensor.body_battery_most_recent','sensor.garmin_connect_body_battery') ?? nAttr('body_battery'), ' %'), 'Hög ' + fmt(nAny('sensor.body_battery_highest','sensor.garmin_connect_body_battery_highest') ?? nAttr('body_battery_highest'), ' %') + ' · låg ' + fmt(nAny('sensor.body_battery_lowest','sensor.garmin_connect_body_battery_lowest') ?? nAttr('body_battery_lowest'), ' %'), '90,220,170', true)}
+            ${kpi('mdi:arm-flex', 'Readiness', fmt(n('sensor.garmin_connect_training_readiness'), ' %'), 'Morgon ' + fmt(n('sensor.garmin_connect_morning_training_readiness'), ' %'), '90,165,255', true)}
+            ${kpi('mdi:sleep', 'Sömnscore', fmt(nAttr('sleep_score'), ''), 'Sömn ' + fmt(nAttr('total_sleep_min'), ' min') + ' / behov ' + fmt(n('sensor.garmin_connect_sleep_need'), ' min'), '120,140,255')}
+            ${kpi('mdi:heart-pulse', 'Vilopuls', fmt(nAny('sensor.resting_heart_rate','sensor.garmin_connect_resting_heart_rate') ?? nAttr('resting_heart_rate'), ' bpm'), '7d snitt ' + fmt(nAny('sensor.last_7_days_avg_heart_rate','sensor.garmin_connect_7_day_average_resting_heart_rate') ?? nAttr('avg_7d_resting_heart_rate'), ' bpm'), '255,90,120')}
+            ${kpi('mdi:chart-bell-curve', 'HRV', fmt(n('sensor.garmin_connect_hrv_last_night_average'), ' ms'), (attr('hrv_status') ?? '—') + ' · baslinje ' + fmt(n('sensor.garmin_connect_hrv_baseline'), ' ms'), '90,230,205')}
+            ${kpi('mdi:brain', 'Stress', fmt(nAny('sensor.avg_stress_level','sensor.garmin_connect_average_stress_level') ?? nAttr('stress_level'), ''), 'Max ' + fmt(nAny('sensor.max_stress_level','sensor.garmin_connect_max_stress_level') ?? nAttr('max_stress_level'), '') + ' · hög ' + fmt(nAny('sensor.high_stress_percentage','sensor.garmin_connect_high_stress_percentage') ?? nAttr('high_stress_percentage'), ' %', 1), '255,180,80')}
+            ${kpi('mdi:lungs', 'SpO2', fmt(nAttr('average_spo2'), ' %', 1), 'Lägst ' + fmt(nAttr('lowest_spo2'), ' %', 0) + ' · ' + (attr('oxygen_status') ?? '—'), '80,230,255')}
+            ${kpi('mdi:water', 'Hydrering', fmt(hydration, ' mL'), 'Mål ' + fmt(hydrationGoal, ' mL') + ' · score ' + fmt(nAttr('hydration_score'), ' %'), '80,190,255')}
+            ${kpi('mdi:blood-bag', 'Blodtryck', fmtId('sensor.garmin_connect_blood_pressure_systolic','',0) + '/' + fmtId('sensor.garmin_connect_blood_pressure_diastolic','',0), raw('sensor.garmin_connect_blood_pressure_category') + ' · puls ' + fmtId('sensor.garmin_connect_blood_pressure_pulse',' bpm',0), '255,90,120')}
+            ${kpi('mdi:walk', 'Steg igår', fmt(steps, ''), 'Veckosnitt ' + fmt(weeklySteps, ''), '90,190,255')}
+            ${kpi('mdi:run-fast', 'VO₂max', fmtId('sensor.garmin_connect_vo2_max','',0), 'mL/kg/min', '190,130,255')}
+            ${kpi('mdi:trophy-outline', 'Endurance', fmtId('sensor.garmin_connect_endurance_score','',0), 'Garmin endurance score', '255,210,90')}
+          </div>`;
+        ]]]
+    extra_styles: |
+      #metrics { width: 100%; }
+
+  - type: custom:button-card
+    show_icon: false
+    show_name: false
+    show_state: false
+    styles:
+      card:
+        - padding: 0 14px 14px 14px
+        - background: rgba(5,8,18,.94)
+        - border-radius: 0 0 28px 28px
+        - box-shadow: none
+    custom_fields:
+      fitness: |
+        [[[
+          const invalid = ['unknown','unavailable','none','None',''];
+          const n = (id) => { const s = states[id]?.state; const v = parseFloat(s); return s !== undefined && !invalid.includes(String(s)) && Number.isFinite(v) ? v : null; };
+          const raw = (id) => { const s = states[id]?.state; return s !== undefined && !invalid.includes(String(s)) ? s : '—'; };
+          const fmt = (v, unit = '', d = 0) => v === null ? '—' : `${v.toFixed(d)}${unit}`;
+          const chrono = n('sensor.garmin_connect_chronological_age');
+          const fitnessAge = n('sensor.garmin_connect_fitness_age');
+          let ageDelta = '—';
+          if (chrono !== null && fitnessAge !== null) {
+            const d = fitnessAge - chrono;
+            if (Math.abs(d) < 0.1) ageDelta = '±0 år';
+            else if (d < 0) ageDelta = `${Math.abs(d).toFixed(1)} år yngre`;
+            else ageDelta = `${d.toFixed(1)} år äldre`;
+          }
+          const flag = (icon, title, value, sub, accent) => `<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border-radius:18px;background:linear-gradient(145deg, rgba(${accent},.13), rgba(255,255,255,.045));border:1px solid rgba(${accent},.18);"><div style="display:flex;align-items:center;gap:10px;min-width:0;"><div style="width:34px;height:34px;border-radius:14px;background:rgba(${accent},.16);display:flex;align-items:center;justify-content:center;border:1px solid rgba(${accent},.22);"><ha-icon icon="${icon}" style="width:18px;height:18px;color:rgba(255,255,255,.82);"></ha-icon></div><div style="min-width:0;"><div style="font-size:13px;font-weight:950;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${title}</div><div style="font-size:11px;color:rgba(255,255,255,.56);font-weight:750;margin-top:2px;">${sub}</div></div></div><div style="font-size:14px;font-weight:950;color:white;text-align:right;">${value}</div></div>`;
+          return `<div style="padding:16px;border-radius:24px;background:radial-gradient(circle at 92% 10%, rgba(190,130,255,.14), transparent 38%),linear-gradient(145deg, rgba(255,255,255,.075), rgba(255,255,255,.035));border:1px solid rgba(255,255,255,.105);box-shadow:inset 0 1px 0 rgba(255,255,255,.08);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><div><div style="font-size:11px;text-transform:uppercase;letter-spacing:.95px;color:rgba(255,255,255,.52);font-weight:950;">Fitness Signals</div><div style="font-size:19px;font-weight:950;color:white;margin-top:3px;">Form, kapacitet & tryck</div></div><ha-icon icon="mdi:chart-line-variant" style="width:25px;height:25px;color:rgba(255,255,255,.58);"></ha-icon></div>
+            <div style="display:grid;grid-template-columns:1fr;gap:8px;">
+              ${flag('mdi:run-fast', 'VO₂max', fmt(n('sensor.garmin_connect_vo2_max'), '', 0), 'mL/kg/min', '190,130,255')}
+              ${flag('mdi:bike-fast', 'FTP Cycling', fmt(n('sensor.garmin_connect_ftp_cycling'), ' W', 0), 'Power to weight ' + fmt(n('sensor.garmin_connect_power_to_weight_cycling'), ' W/kg', 2), '90,190,255')}
+              ${flag('mdi:heart-flash', 'Tröskelpuls', fmt(n('sensor.garmin_connect_lactate_threshold_heart_rate'), ' bpm', 0), 'Lactate threshold HR', '255,90,120')}
+              ${flag('mdi:cake-variant-outline', 'Fitness age', fmt(fitnessAge, ' år', 1), ageDelta + ' än kronologisk ålder', '120,255,170')}
+              ${flag('mdi:target', 'Achievable fitness age', fmt(n('sensor.garmin_connect_achievable_fitness_age'), ' år', 1), 'Garmin potential', '120,255,220')}
+              ${flag('mdi:trophy-outline', 'Endurance score', fmt(n('sensor.garmin_connect_endurance_score'), '', 0), 'Uthållighet', '255,210,90')}
+              ${flag('mdi:blood-bag', 'Blodtryck', fmt(n('sensor.garmin_connect_blood_pressure_systolic'), '', 0) + '/' + fmt(n('sensor.garmin_connect_blood_pressure_diastolic'), '', 0), raw('sensor.garmin_connect_blood_pressure_category') + ' · puls ' + fmt(n('sensor.garmin_connect_blood_pressure_pulse'), ' bpm', 0), '255,90,120')}
+            </div></div>`;
+        ]]]
+    extra_styles: |
+      #fitness { width: 100%; }
