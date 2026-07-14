@@ -1,0 +1,194 @@
+type: custom:vertical-stack-in-card
+cards:
+  - type: custom:button-card
+    entity: sensor.health_snapshot_overall_score
+    name: Health Snapshot
+    icon: mdi:heart-circle
+    show_state: false
+    show_label: true
+    label: |
+      [[[
+        const invalid = ['unknown','unavailable','none','None',''];
+        const n = (id) => {
+          const s = states[id]?.state;
+          const v = parseFloat(s);
+          return s !== undefined && !invalid.includes(String(s)) && Number.isFinite(v) ? v : null;
+        };
+        const raw = (id) => {
+          const s = states[id]?.state;
+          return s !== undefined && !invalid.includes(String(s)) ? s : '—';
+        };
+        const attr = (key) => {
+          const s = states['sensor.health_snapshot_summary'];
+          const v = s?.attributes?.[key];
+          return v !== undefined && !invalid.includes(String(v)) ? v : null;
+        };
+        const nAttr = (key) => {
+          const v = parseFloat(attr(key));
+          return Number.isFinite(v) ? v : null;
+        };
+        const fmt = (v, unit = '', d = 0) => v === null ? '—' : `${v.toFixed(d)}${unit}`;
+
+        const overall = n('sensor.health_snapshot_overall_score');
+        const recovery = n('sensor.health_snapshot_recovery_score');
+        const activity = n('sensor.health_snapshot_activity_score');
+        const body = n('sensor.health_snapshot_body_score');
+        const status = raw('sensor.health_snapshot_status');
+        const summary = raw('sensor.health_snapshot_summary');
+        const oxygen = nAttr('oxygen_score');
+        const lowestSpo2 = nAttr('lowest_spo2');
+        const hydration = nAttr('hydration_score');
+        const bpScore = nAttr('blood_pressure_score');
+
+        let statusSv = status;
+        if (status === 'Good') statusSv = 'Bra läge';
+        else if (status === 'Okay') statusSv = 'Okej läge';
+        else if (status === 'Low') statusSv = 'Låg snapshot';
+        else if (status === 'Recovery needed') statusSv = 'Återhämtning behövs';
+        else if (status === 'High stress') statusSv = 'Hög stress';
+        else if (status === 'Poor sleep') statusSv = 'Svag sömn';
+
+        const chip = (txt, accent) => `<span style="padding:6px 9px;border-radius:999px;background:rgba(${accent},.14);border:1px solid rgba(${accent},.24);font-size:11px;font-weight:950;color:rgba(245,250,255,.96);">${txt}</span>`;
+
+        return `
+          <div style="display:flex;flex-direction:column;gap:10px;width:100%;">
+            <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:14px;">
+              <div>
+                <div style="font-size:38px;font-weight:950;letter-spacing:-1.4px;line-height:1;color:white;">${fmt(overall, '%')}</div>
+                <div style="font-size:13px;font-weight:900;color:rgba(255,255,255,.70);margin-top:6px;">${statusSv}</div>
+              </div>
+              <div style="min-width:92px;padding:10px 12px;border-radius:18px;background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.12);text-align:right;box-shadow:inset 0 1px 0 rgba(255,255,255,.08);">
+                <div style="font-size:10px;text-transform:uppercase;letter-spacing:.9px;color:rgba(255,255,255,.55);font-weight:950;">Recovery</div>
+                <div style="font-size:24px;font-weight:950;color:white;line-height:1.1;margin-top:2px;">${fmt(recovery, '')}</div>
+                <div style="font-size:10px;color:rgba(255,255,255,.58);font-weight:850;">%</div>
+              </div>
+            </div>
+            <div style="padding:11px 12px;border-radius:18px;background:rgba(255,255,255,.075);border:1px solid rgba(255,255,255,.09);color:rgba(255,255,255,.82);font-size:12px;line-height:1.35;font-weight:750;">${summary}</div>
+            <div style="display:flex;flex-wrap:wrap;gap:7px;">
+              ${chip('Recovery ' + fmt(recovery, '%'), '80,255,190')}
+              ${chip('Activity ' + fmt(activity, '%'), '80,180,255')}
+              ${chip('Body ' + fmt(body, '%'), '190,130,255')}
+              ${chip('SpO2 ' + fmt(oxygen, '%') + ' · lägst ' + fmt(lowestSpo2, '%', 0), '80,230,255')}
+              ${chip('Hydration ' + fmt(hydration, '%'), '80,190,255')}
+              ${chip('BP ' + fmt(bpScore, '%'), '255,90,120')}
+            </div>
+          </div>`;
+      ]]]
+    styles:
+      card:
+        - min-height: 230px
+        - padding: 20px
+        - border-radius: 28px 28px 0 0
+        - background: |
+            [[[
+              const score = parseFloat(states['sensor.health_snapshot_overall_score']?.state);
+              const status = states['sensor.health_snapshot_status']?.state;
+              if (status === 'Recovery needed' || status === 'Poor sleep' || (Number.isFinite(score) && score < 50)) return `radial-gradient(circle at 88% 12%, rgba(255,90,120,.31), transparent 34%),radial-gradient(circle at 8% 0%, rgba(80,170,255,.23), transparent 34%),linear-gradient(135deg, rgba(18,24,42,.98), rgba(6,8,18,.98))`;
+              if (Number.isFinite(score) && score >= 80) return `radial-gradient(circle at 88% 12%, rgba(80,255,180,.32), transparent 34%),radial-gradient(circle at 8% 0%, rgba(80,170,255,.30), transparent 34%),linear-gradient(135deg, rgba(18,24,42,.98), rgba(6,8,18,.98))`;
+              return `radial-gradient(circle at 88% 12%, rgba(90,170,255,.30), transparent 34%),radial-gradient(circle at 8% 0%, rgba(190,130,255,.22), transparent 34%),linear-gradient(135deg, rgba(18,24,42,.98), rgba(6,8,18,.98))`;
+            ]]]
+        - border: 1px solid rgba(255,255,255,.13)
+        - box-shadow: 0 22px 52px rgba(0,0,0,.52)
+        - overflow: hidden
+      grid:
+        - grid-template-areas: '"i n" "i l"'
+        - grid-template-columns: 58px 1fr
+        - grid-template-rows: min-content 1fr
+      icon:
+        - width: 34px
+        - color: rgba(255,255,255,.96)
+      img_cell:
+        - width: 54px
+        - height: 54px
+        - border-radius: 20px
+        - background: rgba(255,255,255,.12)
+        - border: 1px solid rgba(255,255,255,.12)
+      name:
+        - justify-self: start
+        - font-size: 20px
+        - font-weight: 950
+        - color: white
+      label:
+        - justify-self: stretch
+        - text-align: left
+        - color: white
+        - white-space: normal
+
+  - type: custom:button-card
+    show_icon: false
+    show_name: false
+    show_state: false
+    styles:
+      card:
+        - padding: 14px
+        - border-radius: 0
+        - background: rgba(5,8,18,.94)
+        - box-shadow: none
+    custom_fields:
+      scores: |
+        [[[
+          const invalid = ['unknown','unavailable','none','None',''];
+          const n = (id) => { const s = states[id]?.state; const v = parseFloat(s); return s !== undefined && !invalid.includes(String(s)) && Number.isFinite(v) ? v : null; };
+          const attr = (key) => { const s = states['sensor.health_snapshot_summary']; const v = s?.attributes?.[key]; return v !== undefined && !invalid.includes(String(v)) ? v : null; };
+          const nAttr = (key) => { const v = parseFloat(attr(key)); return Number.isFinite(v) ? v : null; };
+          const scoreCard = (icon, title, entityOrAttr, sub, accent, source = 'entity') => {
+            const value = source === 'attr' ? nAttr(entityOrAttr) : n(entityOrAttr);
+            const pct = value === null ? 0 : Math.max(0, Math.min(100, value));
+            return `<div style="padding:15px;border-radius:22px;background:radial-gradient(circle at 90% 12%, rgba(${accent},.22), transparent 40%),linear-gradient(145deg, rgba(255,255,255,.078), rgba(255,255,255,.035));border:1px solid rgba(255,255,255,.105);box-shadow:inset 0 1px 0 rgba(255,255,255,.08);"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px;"><div><div style="display:flex;align-items:center;gap:8px;"><ha-icon icon="${icon}" style="width:18px;height:18px;color:rgba(255,255,255,.82);"></ha-icon><div style="font-size:11px;text-transform:uppercase;letter-spacing:.85px;color:rgba(255,255,255,.56);font-weight:950;">${title}</div></div><div style="font-size:11px;color:rgba(255,255,255,.56);font-weight:750;margin-top:7px;">${sub}</div></div><div style="font-size:23px;font-weight:950;color:white;line-height:1;">${value !== null ? value.toFixed(0) : '—'}%</div></div><div style="height:10px;border-radius:999px;background:rgba(255,255,255,.10);overflow:hidden;box-shadow:inset 0 1px 3px rgba(0,0,0,.38);"><div style="width:${pct}%;height:100%;border-radius:999px;background:linear-gradient(90deg, rgba(${accent},.62), rgba(${accent},1));box-shadow:0 0 16px rgba(${accent},.26);"></div></div></div>`;
+          };
+          return `<div style="display:grid;grid-template-columns:1fr;gap:10px;">
+            ${scoreCard('mdi:battery-heart', 'Recovery', 'sensor.health_snapshot_recovery_score', 'Body Battery, sömn, HRV, stress, SpO2', '90,230,190')}
+            ${scoreCard('mdi:lungs', 'Oxygen', 'oxygen_score', 'SpO2 snitt, senaste och lägsta', '80,230,255', 'attr')}
+            ${scoreCard('mdi:water', 'Hydration', 'hydration_score', 'Intag jämfört med mål', '80,190,255', 'attr')}
+            ${scoreCard('mdi:blood-bag', 'Blood pressure', 'blood_pressure_score', 'Systoliskt / diastoliskt / kategori', '255,90,120', 'attr')}
+            ${scoreCard('mdi:run-fast', 'Activity', 'sensor.health_snapshot_activity_score', 'Steg, distans, intensitet, trend', '90,180,255')}
+            ${scoreCard('mdi:human', 'Body', 'sensor.health_snapshot_body_score', 'Withings, BP, hydration, vascular', '190,130,255')}
+          </div>`;
+        ]]]
+    extra_styles: |
+      #scores { width: 100%; }
+
+  - type: custom:button-card
+    show_icon: false
+    show_name: false
+    show_state: false
+    styles:
+      card:
+        - padding: 0 14px 14px 14px
+        - border-radius: 0 0 28px 28px
+        - background: rgba(5,8,18,.94)
+        - box-shadow: none
+    custom_fields:
+      details: |
+        [[[
+          const invalid = ['unknown','unavailable','none','None',''];
+          const attr = (key) => { const s = states['sensor.health_snapshot_summary']; const v = s?.attributes?.[key]; return v !== undefined && !invalid.includes(String(v)) ? v : null; };
+          const nAttr = (key) => { const v = parseFloat(attr(key)); return Number.isFinite(v) ? v : null; };
+          const fmtAttr = (key, unit = '', d = 0) => { const v = nAttr(key); return v === null ? '—' : `${v.toFixed(d)}${unit}`; };
+          const rawAttr = (key) => attr(key) ?? '—';
+          const item = (icon, title, value, sub, accent) => `<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border-radius:18px;background:linear-gradient(145deg, rgba(${accent},.12), rgba(255,255,255,.045));border:1px solid rgba(${accent},.17);"><div style="display:flex;align-items:center;gap:10px;min-width:0;"><div style="width:34px;height:34px;border-radius:14px;background:rgba(${accent},.15);display:flex;align-items:center;justify-content:center;border:1px solid rgba(${accent},.22);"><ha-icon icon="${icon}" style="width:18px;height:18px;color:rgba(255,255,255,.82);"></ha-icon></div><div style="min-width:0;"><div style="font-size:13px;font-weight:950;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${title}</div><div style="font-size:11px;color:rgba(255,255,255,.56);font-weight:750;margin-top:2px;">${sub}</div></div></div><div style="font-size:14px;font-weight:950;color:white;text-align:right;">${value}</div></div>`;
+          return `<div style="padding:16px;border-radius:24px;background:radial-gradient(circle at 92% 10%, rgba(90,170,255,.13), transparent 38%),linear-gradient(145deg, rgba(255,255,255,.075), rgba(255,255,255,.035));border:1px solid rgba(255,255,255,.105);box-shadow:inset 0 1px 0 rgba(255,255,255,.08);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><div><div style="font-size:11px;text-transform:uppercase;letter-spacing:.95px;color:rgba(255,255,255,.52);font-weight:950;">Garmin + Withings</div><div style="font-size:19px;font-weight:950;color:white;margin-top:3px;">Snapshot detaljer</div></div><ha-icon icon="mdi:clipboard-pulse" style="width:25px;height:25px;color:rgba(255,255,255,.58);"></ha-icon></div>
+            <div style="display:grid;grid-template-columns:1fr;gap:8px;">
+              ${item('mdi:battery-heart', 'Body Battery', fmtAttr('body_battery', '%', 0), 'Hög ' + fmtAttr('body_battery_highest', '%', 0) + ' · låg ' + fmtAttr('body_battery_lowest', '%', 0), '90,230,190')}
+              ${item('mdi:battery-plus', 'Body Battery laddning', fmtAttr('body_battery_charged', '%', 0), 'Drained ' + fmtAttr('body_battery_drained', '%', 0), '90,230,190')}
+              ${item('mdi:arm-flex', 'Training Readiness', fmtAttr('training_readiness', '%', 0), 'Morgon ' + fmtAttr('morning_training_readiness', '%', 0), '90,180,255')}
+              ${item('mdi:sleep', 'Sleep Score', fmtAttr('sleep_score', '', 0), fmtAttr('total_sleep_min', ' min', 0) + ' / behov ' + fmtAttr('sleep_need_min', ' min', 0), '120,140,255')}
+              ${item('mdi:lungs', 'Oxygen Score', fmtAttr('oxygen_score', '%', 0), rawAttr('oxygen_status'), '80,230,255')}
+              ${item('mdi:chart-bell-curve', 'HRV', rawAttr('hrv_status'), 'Natt ' + fmtAttr('hrv_last_night_ms', ' ms', 0) + ' · baseline ' + fmtAttr('hrv_baseline_ms', ' ms', 0), '90,230,205')}
+              ${item('mdi:heart-pulse', 'Vilopuls', fmtAttr('resting_heart_rate', ' bpm', 0), '7d ' + fmtAttr('avg_7d_resting_heart_rate', ' bpm', 0) + ' · min/max ' + fmtAttr('min_heart_rate', '', 0) + '/' + fmtAttr('max_heart_rate', '', 0), '255,90,120')}
+              ${item('mdi:brain', 'Stress', fmtAttr('stress_level', '', 0), 'Score ' + fmtAttr('stress_score', '%', 0) + ' · hög ' + fmtAttr('high_stress_percentage', '%', 1), '255,190,90')}
+              ${item('mdi:water', 'Hydrering', fmtAttr('hydration', ' mL', 0), 'Mål ' + fmtAttr('hydration_goal', ' mL', 0) + ' · score ' + fmtAttr('hydration_score', '%', 0), '80,190,255')}
+              ${item('mdi:blood-bag', 'Blodtryck', fmtAttr('blood_pressure_systolic', '', 0) + '/' + fmtAttr('blood_pressure_diastolic', '', 0), rawAttr('blood_pressure_category') + ' · score ' + fmtAttr('blood_pressure_score', '%', 0), '255,90,120')}
+              ${item('mdi:run-fast', 'VO₂max', fmtAttr('vo2_max', '', 1), 'Endurance ' + fmtAttr('endurance_score', '', 0), '190,130,255')}
+              ${item('mdi:cake-variant-outline', 'Fitness age', fmtAttr('fitness_age', ' år', 1), 'Delta ' + fmtAttr('fitness_age_delta', ' år', 1) + ' · mål ' + fmtAttr('achievable_fitness_age', ' år', 1), '120,255,170')}
+              ${item('mdi:walk', 'Steg / distans', fmtAttr('yesterday_steps', '', 0), 'Distans ' + fmtAttr('yesterday_distance_m', ' m', 0) + ' · veckosnitt ' + fmtAttr('weekly_step_average', '', 0), '90,190,255')}
+              ${item('mdi:scale-bathroom', 'Vikt', fmtAttr('withings_weight', ' kg', 1), 'Withings', '90,165,255')}
+              ${item('mdi:water-percent', 'Fett', fmtAttr('withings_fat_percentage', '%', 1), 'Withings body fat', '190,130,255')}
+              ${item('mdi:stomach', 'Visceral fat', fmtAttr('withings_visceral_fat', '', 1), 'Withings index', '255,135,90')}
+              ${item('mdi:waves-arrow-right', 'PWV', fmtAttr('withings_pwv', ' m/s', 2), 'Pulsvågshastighet', '80,230,205')}
+              ${item('mdi:heart-cog', 'Vaskulär ålder', fmtAttr('withings_vascular_age', '', 1), 'Withings-estimat', '255,190,85')}
+            </div></div>`;
+        ]]]
+    extra_styles: |
+      #details { width: 100%; }
