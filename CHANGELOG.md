@@ -2,8 +2,9 @@
 
 ## 2026.10.0b3
 
-- Add a complete premium BodyFit dashboard card.
+- Add a complete premium BodyFit dashboard card with a persistent summary header and collapsible detail sections.
 - Use native Statistic cards for rolling 30-day and 90-day changes, avoiding eight extra helper entities.
+- Add collapsible sections for segmental analysis, 30/90-day change, 30-day trends and 12-month trends.
 - Add 30-day daily and 12-month monthly BodyFit trend graphs.
 - Keep the BodyFit instrument-change boundary clean by using only the new proxy entities.
 - Keep `beta` on verified `2026.10.0b2` until the dashboard is tested.
