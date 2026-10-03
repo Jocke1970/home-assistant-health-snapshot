@@ -17,7 +17,8 @@ from homeassistant.components.sensor import (
     SensorStateClass,
 )
 from homeassistant.const import PERCENTAGE, UnitOfMass
-from homeassistant.core import HomeAssistant
+from homeassistant.core import Event, EventStateChangedData, HomeAssistant, callback
+from homeassistant.helpers.event import async_track_state_change_event
 
 SCAN_INTERVAL = timedelta(minutes=15)
 INVALID = {"unknown", "unavailable", "none", "None", ""}
@@ -107,7 +108,7 @@ async def async_setup_platform(
 class BodyFitMetricSensor(SensorEntity):
     """BodyFit-only proxy sensor used for clean post-migration history."""
 
-    _attr_should_poll = True
+    _attr_should_poll = False
     _attr_state_class = SensorStateClass.MEASUREMENT
 
     def __init__(self, hass: HomeAssistant, key: str) -> None:
@@ -122,12 +123,45 @@ class BodyFitMetricSensor(SensorEntity):
         self._attr_device_class = config["device_class"]
         self._attr_native_value = None
 
+        if self.key == "bodyfit_water_percentage":
+            self._source_entities = (
+                "sensor.withings_hydrering",
+                "sensor.withings_vikt",
+            )
+        else:
+            self._source_entities = (self.source,)
+
+        self._update_from_sources()
+
     @property
     def native_value(self):
         return self._attr_native_value
 
-    def update(self) -> None:
-        """Mirror current BodyFit metrics into fresh long-term-statistics entities."""
+    async def async_added_to_hass(self) -> None:
+        """Start listening for source entity changes."""
+        await super().async_added_to_hass()
+        self.async_on_remove(
+            async_track_state_change_event(
+                self.hass,
+                self._source_entities,
+                self._async_source_changed,
+            )
+        )
+        self._update_from_sources()
+
+    @callback
+    def _async_source_changed(
+        self,
+        event: Event[EventStateChangedData],
+    ) -> None:
+        """Update immediately when a Withings source entity changes."""
+        self.async_set_context(event.context)
+        self._update_from_sources()
+        self.async_write_ha_state()
+
+    @callback
+    def _update_from_sources(self) -> None:
+        """Mirror current Withings values into BodyFit history sensors."""
         if self.key == "bodyfit_water_percentage":
             hydration = f(self.hass, "sensor.withings_hydrering")
             weight = f(self.hass, "sensor.withings_vikt")
