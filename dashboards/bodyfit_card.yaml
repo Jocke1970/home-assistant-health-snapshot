@@ -19,27 +19,27 @@ cards:
           return v === null ? '—' : `${v.toFixed(d)}${unit}`;
         };
         const chip = (icon, title, value, accent) => `
-          <div style="padding:10px 11px;border-radius:18px;background:linear-gradient(145deg,rgba(${accent},.15),rgba(255,255,255,.045));border:1px solid rgba(${accent},.18);min-width:0;">
-            <div style="display:flex;align-items:center;gap:7px;color:rgba(255,255,255,.58);font-size:10px;font-weight:950;text-transform:uppercase;letter-spacing:.7px;">
-              <ha-icon icon="${icon}" style="width:16px;height:16px;color:rgba(255,255,255,.72);"></ha-icon>
+          <div style="padding:10px 11px;border-radius:18px;background:rgba(${accent},.09);border:1px solid rgba(${accent},.18);min-width:0;">
+            <div style="display:flex;align-items:center;gap:7px;color:var(--secondary-text-color);font-size:10px;font-weight:950;text-transform:uppercase;letter-spacing:.7px;">
+              <ha-icon icon="${icon}" style="width:16px;height:16px;color:var(--secondary-text-color);"></ha-icon>
               ${title}
             </div>
-            <div style="font-size:20px;font-weight:950;color:white;margin-top:5px;white-space:nowrap;">${value}</div>
+            <div style="font-size:20px;font-weight:950;color:var(--primary-text-color);margin-top:5px;white-space:nowrap;">${value}</div>
           </div>`;
         return `
           <div style="display:flex;flex-direction:column;gap:12px;width:100%;">
             <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:14px;">
               <div>
-                <div style="font-size:40px;font-weight:950;letter-spacing:-1.5px;line-height:1;color:white;">
+                <div style="font-size:40px;font-weight:950;letter-spacing:-1.5px;line-height:1;color:var(--primary-text-color);">
                   ${fmt('sensor.health_snapshot_bodyfit_weight',' kg',1)}
                 </div>
-                <div style="margin-top:6px;font-size:12px;font-weight:850;color:rgba(255,255,255,.62);">
+                <div style="margin-top:6px;font-size:12px;font-weight:850;color:var(--secondary-text-color);">
                   BodyFit trendhistorik · start 2026-10-03
                 </div>
               </div>
-              <div style="padding:10px 12px;border-radius:18px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.11);text-align:right;">
-                <div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:rgba(255,255,255,.52);font-weight:950;">Vätska</div>
-                <div style="font-size:24px;font-weight:950;color:white;line-height:1.1;margin-top:2px;">${fmt('sensor.health_snapshot_bodyfit_water_percentage','%',1)}</div>
+              <div style="padding:10px 12px;border-radius:18px;background:rgba(90,170,255,.08);border:1px solid rgba(90,170,255,.18);text-align:right;">
+                <div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--secondary-text-color);font-weight:950;">Vätska</div>
+                <div style="font-size:24px;font-weight:950;color:var(--primary-text-color);line-height:1.1;margin-top:2px;">${fmt('sensor.health_snapshot_bodyfit_water_percentage','%',1)}</div>
               </div>
             </div>
 
@@ -58,9 +58,9 @@ cards:
         - min-height: 280px
         - padding: 20px
         - border-radius: 28px 28px 0 0
-        - background: radial-gradient(circle at 88% 12%, rgba(190,130,255,.28), transparent 34%), radial-gradient(circle at 8% 0%, rgba(80,200,255,.24), transparent 36%), linear-gradient(135deg, rgba(18,24,42,.98), rgba(6,8,18,.98))
-        - border: 1px solid rgba(255,255,255,.13)
-        - box-shadow: 0 22px 52px rgba(0,0,0,.52)
+        - background: radial-gradient(circle at 88% 10%, rgba(190,130,255,.10), transparent 34%), radial-gradient(circle at 8% 0%, rgba(80,200,255,.10), transparent 36%), var(--ha-card-background, var(--card-background-color))
+        - border: 1px solid var(--divider-color)
+        - box-shadow: 0 6px 22px rgba(0,0,0,.08)
         - overflow: hidden
       grid:
         - grid-template-areas: '"i n" "i l"'
@@ -68,22 +68,22 @@ cards:
         - grid-template-rows: min-content 1fr
       icon:
         - width: 34px
-        - color: rgba(255,255,255,.96)
+        - color: var(--primary-text-color)
       img_cell:
         - width: 54px
         - height: 54px
         - border-radius: 20px
-        - background: rgba(255,255,255,.12)
-        - border: 1px solid rgba(255,255,255,.12)
+        - background: rgba(90,170,255,.10)
+        - border: 1px solid rgba(90,170,255,.18)
       name:
         - justify-self: start
         - font-size: 20px
         - font-weight: 950
-        - color: white
+        - color: var(--primary-text-color)
       label:
         - justify-self: stretch
         - text-align: left
-        - color: white
+        - color: var(--primary-text-color)
         - white-space: normal
 
   - type: custom:expander-card
