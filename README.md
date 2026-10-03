@@ -124,3 +124,23 @@ It uses:
 - the existing uploaded body image media-source reference used by the current dashboard
 
 The clean BodyFit trend history starts on 2026-10-03, so rolling windows initially represent the available post-migration history until the full 30/90-day windows have elapsed.
+
+
+## Withings health metrics dashboard
+
+A separate Withings health metrics card is available at:
+
+```text
+dashboards/withings_health_card.yaml
+```
+
+This card intentionally complements rather than duplicates the BodyFit body-composition card. It includes:
+
+- vascular age, pulse wave velocity (PWV) and Withings pulse
+- 30-day and 12-month cardiovascular trend graphs
+- total body water, intracellular water (ICW) and extracellular water (ECW)
+- latest Withings workout details
+- weight/step goals
+- BodyFit and Body Comp battery/maintenance status
+
+The card follows the active Home Assistant theme and uses the same collapsible section pattern as the BodyFit dashboard.
