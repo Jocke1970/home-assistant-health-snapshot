@@ -1,0 +1,405 @@
+type: custom:vertical-stack-in-card
+cards:
+  - type: custom:button-card
+    entity: sensor.health_snapshot_bodyfit_weight
+    name: BodyFit
+    icon: mdi:human-male
+    show_state: false
+    show_label: true
+    label: |
+      [[[
+        const invalid = ['unknown','unavailable','none','None',''];
+        const n = (id) => {
+          const s = states[id]?.state;
+          const v = parseFloat(s);
+          return s !== undefined && !invalid.includes(String(s)) && Number.isFinite(v) ? v : null;
+        };
+        const fmt = (id, unit = '', d = 1) => {
+          const v = n(id);
+          return v === null ? '—' : `${v.toFixed(d)}${unit}`;
+        };
+        const chip = (icon, title, value, accent) => `
+          <div style="padding:10px 11px;border-radius:18px;background:linear-gradient(145deg,rgba(${accent},.15),rgba(255,255,255,.045));border:1px solid rgba(${accent},.18);min-width:0;">
+            <div style="display:flex;align-items:center;gap:7px;color:rgba(255,255,255,.58);font-size:10px;font-weight:950;text-transform:uppercase;letter-spacing:.7px;">
+              <ha-icon icon="${icon}" style="width:16px;height:16px;color:rgba(255,255,255,.72);"></ha-icon>
+              ${title}
+            </div>
+            <div style="font-size:20px;font-weight:950;color:white;margin-top:5px;white-space:nowrap;">${value}</div>
+          </div>`;
+        return `
+          <div style="display:flex;flex-direction:column;gap:12px;width:100%;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:14px;">
+              <div>
+                <div style="font-size:40px;font-weight:950;letter-spacing:-1.5px;line-height:1;color:white;">
+                  ${fmt('sensor.health_snapshot_bodyfit_weight',' kg',1)}
+                </div>
+                <div style="margin-top:6px;font-size:12px;font-weight:850;color:rgba(255,255,255,.62);">
+                  BodyFit trendhistorik · start 2026-10-03
+                </div>
+              </div>
+              <div style="padding:10px 12px;border-radius:18px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.11);text-align:right;">
+                <div style="font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:rgba(255,255,255,.52);font-weight:950;">Vätska</div>
+                <div style="font-size:24px;font-weight:950;color:white;line-height:1.1;margin-top:2px;">${fmt('sensor.health_snapshot_bodyfit_water_percentage','%',1)}</div>
+              </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;">
+              ${chip('mdi:water-percent','Fett',fmt('sensor.health_snapshot_bodyfit_fat_percentage','%',1),'190,130,255')}
+              ${chip('mdi:arm-flex','Muskel',fmt('sensor.health_snapshot_bodyfit_muscle_mass',' kg',2),'80,235,180')}
+              ${chip('mdi:weight-kilogram','Fettmassa',fmt('sensor.health_snapshot_bodyfit_fat_mass',' kg',2),'255,150,90')}
+              ${chip('mdi:human','Fettfri',fmt('sensor.health_snapshot_bodyfit_fat_free_mass',' kg',2),'90,180,255')}
+              ${chip('mdi:bone','Benmassa',fmt('sensor.health_snapshot_bodyfit_bone_mass',' kg',2),'235,235,245')}
+              ${chip('mdi:stomach','Visceralt',fmt('sensor.health_snapshot_bodyfit_visceral_fat','',1),'255,120,100')}
+            </div>
+          </div>`;
+      ]]]
+    styles:
+      card:
+        - min-height: 280px
+        - padding: 20px
+        - border-radius: 28px 28px 0 0
+        - background: radial-gradient(circle at 88% 12%, rgba(190,130,255,.28), transparent 34%), radial-gradient(circle at 8% 0%, rgba(80,200,255,.24), transparent 36%), linear-gradient(135deg, rgba(18,24,42,.98), rgba(6,8,18,.98))
+        - border: 1px solid rgba(255,255,255,.13)
+        - box-shadow: 0 22px 52px rgba(0,0,0,.52)
+        - overflow: hidden
+      grid:
+        - grid-template-areas: '"i n" "i l"'
+        - grid-template-columns: 58px 1fr
+        - grid-template-rows: min-content 1fr
+      icon:
+        - width: 34px
+        - color: rgba(255,255,255,.96)
+      img_cell:
+        - width: 54px
+        - height: 54px
+        - border-radius: 20px
+        - background: rgba(255,255,255,.12)
+        - border: 1px solid rgba(255,255,255,.12)
+      name:
+        - justify-self: start
+        - font-size: 20px
+        - font-weight: 950
+        - color: white
+      label:
+        - justify-self: stretch
+        - text-align: left
+        - color: white
+        - white-space: normal
+
+  - type: custom:button-card
+    show_icon: false
+    show_name: false
+    show_state: false
+    styles:
+      card:
+        - padding: 14px 14px 8px 14px
+        - border-radius: 0
+        - background: rgba(5,8,18,.94)
+        - box-shadow: none
+    custom_fields:
+      title: |
+        [[[
+          return `
+            <div style="display:flex;justify-content:space-between;align-items:center;width:100%;">
+              <div>
+                <div style="font-size:10px;text-transform:uppercase;letter-spacing:.95px;color:rgba(255,255,255,.50);font-weight:950;">Segmental analys</div>
+                <div style="font-size:18px;font-weight:950;color:white;margin-top:3px;">Muskelmassa per kroppsdel</div>
+              </div>
+              <ha-icon icon="mdi:human-handsup" style="width:25px;height:25px;color:rgba(255,255,255,.56);"></ha-icon>
+            </div>`;
+        ]]]
+    extra_styles: |
+      #title { width: 100%; }
+
+  - type: picture-elements
+    image:
+      media_content_id: media-source://image_upload/8ba6a44c2588f3ab0e576a156f39cb82
+      media_content_type: image/png
+      metadata:
+        title: Human_:body.png
+        thumbnail: /api/image/serve/8ba6a44c2588f3ab0e576a156f39cb82/256x256
+        media_class: image
+        navigateIds:
+          - {}
+          - media_content_type: app
+            media_content_id: media-source://image_upload
+    elements:
+      - type: state-label
+        entity: sensor.ovrigt_withings_muskelmassa_i_hoger_arm
+        prefix: "H arm "
+        style:
+          left: 20%
+          top: 32%
+          transform: translate(-50%, -50%)
+          color: white
+          background: rgba(0, 0, 0, 0.62)
+          border-radius: 12px
+          padding: 5px 8px
+          font-size: 12px
+          font-weight: 600
+          white-space: nowrap
+      - type: state-label
+        entity: sensor.ovrigt_withings_muskelmassa_i_vanster_arm
+        prefix: "V arm "
+        style:
+          left: 80%
+          top: 32%
+          transform: translate(-50%, -50%)
+          color: white
+          background: rgba(0, 0, 0, 0.62)
+          border-radius: 12px
+          padding: 5px 8px
+          font-size: 12px
+          font-weight: 600
+          white-space: nowrap
+      - type: state-label
+        entity: sensor.ovrigt_withings_muskelmassa_i_balen
+        prefix: "Bål "
+        style:
+          left: 50%
+          top: 42%
+          transform: translate(-50%, -50%)
+          color: white
+          background: rgba(0, 0, 0, 0.68)
+          border-radius: 12px
+          padding: 5px 9px
+          font-size: 13px
+          font-weight: 600
+          white-space: nowrap
+      - type: state-label
+        entity: sensor.ovrigt_withings_muskelmassa_i_hoger_ben
+        prefix: "H ben "
+        style:
+          left: 39%
+          top: 68%
+          transform: translate(-50%, -50%)
+          color: white
+          background: rgba(0, 0, 0, 0.62)
+          border-radius: 12px
+          padding: 5px 8px
+          font-size: 12px
+          font-weight: 600
+          white-space: nowrap
+      - type: state-label
+        entity: sensor.ovrigt_withings_muskelmassa_i_vanster_ben
+        prefix: "V ben "
+        style:
+          left: 61%
+          top: 68%
+          transform: translate(-50%, -50%)
+          color: white
+          background: rgba(0, 0, 0, 0.62)
+          border-radius: 12px
+          padding: 5px 8px
+          font-size: 12px
+          font-weight: 600
+          white-space: nowrap
+
+  - type: custom:button-card
+    show_icon: false
+    show_name: false
+    show_state: false
+    styles:
+      card:
+        - padding: 14px 14px 8px 14px
+        - border-radius: 0
+        - background: rgba(5,8,18,.94)
+        - box-shadow: none
+    custom_fields:
+      title: |
+        [[[
+          return `
+            <div style="display:flex;justify-content:space-between;align-items:center;width:100%;">
+              <div>
+                <div style="font-size:10px;text-transform:uppercase;letter-spacing:.95px;color:rgba(255,255,255,.50);font-weight:950;">Förändring</div>
+                <div style="font-size:18px;font-weight:950;color:white;margin-top:3px;">30 dagar</div>
+              </div>
+              <ha-icon icon="mdi:chart-timeline-variant" style="width:25px;height:25px;color:rgba(255,255,255,.56);"></ha-icon>
+            </div>`;
+        ]]]
+    extra_styles: |
+      #title { width: 100%; }
+
+  - type: grid
+    columns: 2
+    square: false
+    cards:
+      - type: statistic
+        entity: sensor.health_snapshot_bodyfit_weight
+        name: Vikt Δ30d
+        icon: mdi:scale-bathroom
+        stat_type: change
+        period:
+          rolling_window:
+            duration:
+              days: 30
+      - type: statistic
+        entity: sensor.health_snapshot_bodyfit_fat_percentage
+        name: Fett Δ30d
+        icon: mdi:water-percent
+        stat_type: change
+        period:
+          rolling_window:
+            duration:
+              days: 30
+      - type: statistic
+        entity: sensor.health_snapshot_bodyfit_muscle_mass
+        name: Muskel Δ30d
+        icon: mdi:arm-flex
+        stat_type: change
+        period:
+          rolling_window:
+            duration:
+              days: 30
+      - type: statistic
+        entity: sensor.health_snapshot_bodyfit_visceral_fat
+        name: Visceralt Δ30d
+        icon: mdi:stomach
+        stat_type: change
+        period:
+          rolling_window:
+            duration:
+              days: 30
+
+  - type: custom:button-card
+    show_icon: false
+    show_name: false
+    show_state: false
+    styles:
+      card:
+        - padding: 14px 14px 8px 14px
+        - border-radius: 0
+        - background: rgba(5,8,18,.94)
+        - box-shadow: none
+    custom_fields:
+      title: |
+        [[[
+          return `
+            <div style="display:flex;justify-content:space-between;align-items:center;width:100%;">
+              <div>
+                <div style="font-size:10px;text-transform:uppercase;letter-spacing:.95px;color:rgba(255,255,255,.50);font-weight:950;">Förändring</div>
+                <div style="font-size:18px;font-weight:950;color:white;margin-top:3px;">90 dagar</div>
+              </div>
+              <ha-icon icon="mdi:calendar-range" style="width:25px;height:25px;color:rgba(255,255,255,.56);"></ha-icon>
+            </div>`;
+        ]]]
+    extra_styles: |
+      #title { width: 100%; }
+
+  - type: grid
+    columns: 2
+    square: false
+    cards:
+      - type: statistic
+        entity: sensor.health_snapshot_bodyfit_weight
+        name: Vikt Δ90d
+        icon: mdi:scale-bathroom
+        stat_type: change
+        period:
+          rolling_window:
+            duration:
+              days: 90
+      - type: statistic
+        entity: sensor.health_snapshot_bodyfit_fat_percentage
+        name: Fett Δ90d
+        icon: mdi:water-percent
+        stat_type: change
+        period:
+          rolling_window:
+            duration:
+              days: 90
+      - type: statistic
+        entity: sensor.health_snapshot_bodyfit_muscle_mass
+        name: Muskel Δ90d
+        icon: mdi:arm-flex
+        stat_type: change
+        period:
+          rolling_window:
+            duration:
+              days: 90
+      - type: statistic
+        entity: sensor.health_snapshot_bodyfit_visceral_fat
+        name: Visceralt Δ90d
+        icon: mdi:stomach
+        stat_type: change
+        period:
+          rolling_window:
+            duration:
+              days: 90
+
+  - type: statistics-graph
+    title: Kroppsmassa · 30 dagar
+    chart_type: line
+    days_to_show: 30
+    period: day
+    stat_types:
+      - mean
+    entities:
+      - entity: sensor.health_snapshot_bodyfit_weight
+        name: Vikt
+      - entity: sensor.health_snapshot_bodyfit_muscle_mass
+        name: Muskel
+      - entity: sensor.health_snapshot_bodyfit_fat_mass
+        name: Fettmassa
+
+  - type: statistics-graph
+    title: Kroppssammansättning · 30 dagar
+    chart_type: line
+    days_to_show: 30
+    period: day
+    stat_types:
+      - mean
+    entities:
+      - entity: sensor.health_snapshot_bodyfit_fat_percentage
+        name: Fett %
+      - entity: sensor.health_snapshot_bodyfit_water_percentage
+        name: Vätska %
+
+  - type: statistics-graph
+    title: Kroppsmassa · 12 månader
+    chart_type: line
+    days_to_show: 365
+    period: month
+    stat_types:
+      - mean
+    entities:
+      - entity: sensor.health_snapshot_bodyfit_weight
+        name: Vikt
+      - entity: sensor.health_snapshot_bodyfit_muscle_mass
+        name: Muskel
+      - entity: sensor.health_snapshot_bodyfit_fat_mass
+        name: Fettmassa
+
+  - type: statistics-graph
+    title: Kroppssammansättning · 12 månader
+    chart_type: line
+    days_to_show: 365
+    period: month
+    stat_types:
+      - mean
+    entities:
+      - entity: sensor.health_snapshot_bodyfit_fat_percentage
+        name: Fett %
+      - entity: sensor.health_snapshot_bodyfit_water_percentage
+        name: Vätska %
+
+  - type: custom:button-card
+    show_icon: false
+    show_name: false
+    show_state: false
+    styles:
+      card:
+        - padding: 12px 16px 16px 16px
+        - border-radius: 0 0 28px 28px
+        - background: rgba(5,8,18,.94)
+        - box-shadow: none
+    custom_fields:
+      footer: |
+        [[[
+          return `
+            <div style="padding:10px 12px;border-radius:16px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);font-size:11px;line-height:1.4;color:rgba(255,255,255,.58);font-weight:750;">
+              BodyFit-proxyerna startade sin rena trendhistorik 2026-10-03. 30/90-dagarsvärdena använder därför tillgänglig BodyFit-historik tills hela respektive tidsfönster hunnit fyllas.
+            </div>`;
+        ]]]
+    extra_styles: |
+      #footer { width: 100%; }
