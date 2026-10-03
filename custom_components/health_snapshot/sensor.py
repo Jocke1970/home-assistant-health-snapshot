@@ -11,8 +11,12 @@ from __future__ import annotations
 from datetime import timedelta
 from typing import Any
 
-from homeassistant.components.sensor import SensorEntity
-from homeassistant.const import PERCENTAGE
+from homeassistant.components.sensor import (
+    SensorDeviceClass,
+    SensorEntity,
+    SensorStateClass,
+)
+from homeassistant.const import PERCENTAGE, UnitOfMass
 from homeassistant.core import HomeAssistant
 
 SCAN_INTERVAL = timedelta(minutes=15)
@@ -28,6 +32,66 @@ SENSORS = {
 }
 
 
+BODYFIT_SENSORS = {
+    "bodyfit_weight": {
+        "name": "Health Snapshot BodyFit Weight",
+        "icon": "mdi:scale-bathroom",
+        "source": "sensor.withings_vikt",
+        "unit": UnitOfMass.KILOGRAMS,
+        "device_class": SensorDeviceClass.WEIGHT,
+    },
+    "bodyfit_fat_percentage": {
+        "name": "Health Snapshot BodyFit Fat Percentage",
+        "icon": "mdi:percent",
+        "source": "sensor.withings_fettforhallande",
+        "unit": PERCENTAGE,
+        "device_class": None,
+    },
+    "bodyfit_muscle_mass": {
+        "name": "Health Snapshot BodyFit Muscle Mass",
+        "icon": "mdi:arm-flex",
+        "source": "sensor.withings_muskelmassa",
+        "unit": UnitOfMass.KILOGRAMS,
+        "device_class": SensorDeviceClass.WEIGHT,
+    },
+    "bodyfit_fat_mass": {
+        "name": "Health Snapshot BodyFit Fat Mass",
+        "icon": "mdi:weight-kilogram",
+        "source": "sensor.withings_fettmassa",
+        "unit": UnitOfMass.KILOGRAMS,
+        "device_class": SensorDeviceClass.WEIGHT,
+    },
+    "bodyfit_fat_free_mass": {
+        "name": "Health Snapshot BodyFit Fat Free Mass",
+        "icon": "mdi:human",
+        "source": "sensor.withings_fettfri_massa",
+        "unit": UnitOfMass.KILOGRAMS,
+        "device_class": SensorDeviceClass.WEIGHT,
+    },
+    "bodyfit_bone_mass": {
+        "name": "Health Snapshot BodyFit Bone Mass",
+        "icon": "mdi:bone",
+        "source": "sensor.withings_benmassa",
+        "unit": UnitOfMass.KILOGRAMS,
+        "device_class": SensorDeviceClass.WEIGHT,
+    },
+    "bodyfit_water_percentage": {
+        "name": "Health Snapshot BodyFit Water Percentage",
+        "icon": "mdi:water-percent",
+        "source": None,
+        "unit": PERCENTAGE,
+        "device_class": None,
+    },
+    "bodyfit_visceral_fat": {
+        "name": "Health Snapshot BodyFit Visceral Fat",
+        "icon": "mdi:stomach",
+        "source": "sensor.withings_visceral_fat_index",
+        "unit": None,
+        "device_class": None,
+    },
+}
+
+
 async def async_setup_platform(
     hass: HomeAssistant,
     config: dict[str, Any],
@@ -35,7 +99,45 @@ async def async_setup_platform(
     discovery_info: dict[str, Any] | None = None,
 ) -> None:
     """Set up Health Snapshot sensors."""
-    async_add_entities([HealthSnapshotSensor(hass, key) for key in SENSORS], True)
+    entities = [HealthSnapshotSensor(hass, key) for key in SENSORS]
+    entities.extend(BodyFitMetricSensor(hass, key) for key in BODYFIT_SENSORS)
+    async_add_entities(entities, True)
+
+
+class BodyFitMetricSensor(SensorEntity):
+    """BodyFit-only proxy sensor used for clean post-migration history."""
+
+    _attr_should_poll = True
+    _attr_state_class = SensorStateClass.MEASUREMENT
+
+    def __init__(self, hass: HomeAssistant, key: str) -> None:
+        self.hass = hass
+        self.key = key
+        config = BODYFIT_SENSORS[key]
+        self.source = config["source"]
+        self._attr_name = config["name"]
+        self._attr_unique_id = f"health_snapshot_{key}"
+        self._attr_icon = config["icon"]
+        self._attr_native_unit_of_measurement = config["unit"]
+        self._attr_device_class = config["device_class"]
+        self._attr_native_value = None
+
+    @property
+    def native_value(self):
+        return self._attr_native_value
+
+    def update(self) -> None:
+        """Mirror current BodyFit metrics into fresh long-term-statistics entities."""
+        if self.key == "bodyfit_water_percentage":
+            hydration = f(self.hass, "sensor.withings_hydrering")
+            weight = f(self.hass, "sensor.withings_vikt")
+            if hydration is None or weight is None or weight <= 0:
+                self._attr_native_value = None
+                return
+            self._attr_native_value = round((hydration / weight) * 100, 2)
+            return
+
+        self._attr_native_value = f(self.hass, self.source)
 
 
 class HealthSnapshotSensor(SensorEntity):

@@ -1,7 +1,7 @@
 {
   "domain": "health_snapshot",
   "name": "Health Snapshot",
-  "version": "0.2.0",
+  "version": "2026.10.0b1",
   "documentation": "https://github.com/Jocke1970/home-assistant-health-snapshot",
   "requirements": [],
   "codeowners": [],
