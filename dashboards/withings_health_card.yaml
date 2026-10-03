@@ -437,17 +437,11 @@ cards:
               const weightGoal = n('sensor.withings_viktmal');
               const stepGoal = n('sensor.withings_stegmal');
               const bodyfitBattery = raw('sensor.withings_bodyfit_batteri');
-              const bodyCompBattery = raw('sensor.withings_batteri');
-              const bodyfitMaintenance = n('sensor.withings_bodyfit_underhall_withings_bodyfit');
-              const bodyCompMaintenance = n('sensor.device_maintenance_withings_body_comp');
               return `
                 <div style="display:flex;flex-direction:column;gap:8px;width:100%;">
                   ${item('mdi:scale-bathroom','Viktmål',fmt(weightGoal,' kg',1))}
                   ${item('mdi:walk','Stegmål',fmt(stepGoal,' steg',0))}
                   ${item('mdi:battery','BodyFit batteri',batterySv(bodyfitBattery),'Withings BodyFit')}
-                  ${item('mdi:battery','Body Comp batteri',batterySv(bodyCompBattery),'Äldre våg')}
-                  ${item('mdi:tools','BodyFit underhåll',fmt(bodyfitMaintenance,' d',1))}
-                  ${item('mdi:tools','Body Comp underhåll',fmt(bodyCompMaintenance,' d',1))}
                 </div>`;
             ]]]
         extra_styles: |
