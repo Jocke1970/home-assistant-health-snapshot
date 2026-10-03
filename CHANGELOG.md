@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026.10.0b3
+
+- Add a complete premium BodyFit dashboard card.
+- Use native Statistic cards for rolling 30-day and 90-day changes, avoiding eight extra helper entities.
+- Add 30-day daily and 12-month monthly BodyFit trend graphs.
+- Keep the BodyFit instrument-change boundary clean by using only the new proxy entities.
+- Keep `beta` on verified `2026.10.0b2` until the dashboard is tested.
+
 ## 2026.10.0b2
 
 - Make BodyFit proxy sensors event-driven instead of waiting for the 15-minute platform poll.
