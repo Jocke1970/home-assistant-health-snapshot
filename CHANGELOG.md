@@ -1,5 +1,22 @@
 # Changelog
 
+## 2026.10.0b4
+
+- Add a separate theme-aware Withings health metrics dashboard.
+- Keep BodyFit body-composition data in its own card instead of mixing concerns.
+- Add current vascular age, PWV and Withings pulse to the summary.
+- Add collapsible sections for cardiovascular trends, body-water compartments, latest workout, goals and device status.
+- Use ICW, ECW and total hydration directly from Withings without creating extra helper entities.
+
+## 2026.10.0b3
+
+- Add a complete premium BodyFit dashboard card with a persistent summary header and collapsible detail sections.
+- Use native Statistic cards for rolling 30-day and 90-day changes, avoiding eight extra helper entities.
+- Add collapsible sections for segmental analysis, 30/90-day change, 30-day trends and 12-month trends.
+- Add 30-day daily and 12-month monthly BodyFit trend graphs.
+- Keep the BodyFit instrument-change boundary clean by using only the new proxy entities.
+- Keep `beta` on verified `2026.10.0b2` until the dashboard is tested.
+
 ## 2026.10.0b2
 
 - Make BodyFit proxy sensors event-driven instead of waiting for the 15-minute platform poll.

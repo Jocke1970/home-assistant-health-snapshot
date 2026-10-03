@@ -1,0 +1,470 @@
+type: custom:vertical-stack-in-card
+cards:
+  - type: custom:button-card
+    entity: sensor.withings_vaskular_alder
+    name: Withings Hälsomått
+    icon: mdi:heart-pulse
+    show_state: false
+    show_label: true
+    label: |
+      [[[
+        const invalid = ['unknown','unavailable','none','None',''];
+        const n = (id) => {
+          const s = states[id]?.state;
+          const v = parseFloat(s);
+          return s !== undefined && !invalid.includes(String(s)) && Number.isFinite(v) ? v : null;
+        };
+        const fmt = (id, unit = '', d = 1) => {
+          const v = n(id);
+          return v === null ? '—' : `${v.toFixed(d)}${unit}`;
+        };
+        const tile = (icon, title, value, accent, sub = '') => `
+          <div style="padding:12px;border-radius:18px;background:rgba(${accent},.08);border:1px solid rgba(${accent},.18);min-width:0;">
+            <div style="display:flex;align-items:center;gap:7px;color:var(--secondary-text-color);font-size:10px;font-weight:950;text-transform:uppercase;letter-spacing:.7px;">
+              <ha-icon icon="${icon}" style="width:16px;height:16px;color:var(--secondary-text-color);"></ha-icon>
+              ${title}
+            </div>
+            <div style="font-size:22px;font-weight:950;color:var(--primary-text-color);margin-top:6px;white-space:nowrap;">${value}</div>
+            ${sub ? `<div style="font-size:10px;font-weight:750;color:var(--secondary-text-color);margin-top:3px;">${sub}</div>` : ''}
+          </div>`;
+        return `
+          <div style="display:flex;flex-direction:column;gap:12px;width:100%;">
+            <div style="font-size:12px;font-weight:800;color:var(--secondary-text-color);">
+              Övriga mätvärden från Withings
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;">
+              ${tile('mdi:heart-cog','Vaskulär ålder',fmt('sensor.withings_vaskular_alder',' år',1),'255,185,85')}
+              ${tile('mdi:waves-arrow-right','PWV',fmt('sensor.withings_pulsvagens_hastighet',' m/s',2),'80,205,200')}
+              ${tile('mdi:heart-pulse','Puls',fmt('sensor.withings_hjartpuls',' bpm',0),'255,100,120')}
+            </div>
+          </div>`;
+      ]]]
+    styles:
+      card:
+        - padding: 18px
+        - border-radius: 28px 28px 0 0
+        - background: radial-gradient(circle at 90% 10%, rgba(255,185,85,.10), transparent 34%), radial-gradient(circle at 5% 0%, rgba(80,205,200,.09), transparent 38%), var(--ha-card-background, var(--card-background-color))
+        - border: 1px solid var(--divider-color)
+        - box-shadow: 0 6px 22px rgba(0,0,0,.08)
+        - overflow: hidden
+      grid:
+        - grid-template-areas: '"i n" "i l"'
+        - grid-template-columns: 58px 1fr
+        - grid-template-rows: min-content 1fr
+      icon:
+        - width: 32px
+        - color: var(--primary-text-color)
+      img_cell:
+        - width: 52px
+        - height: 52px
+        - border-radius: 20px
+        - background: rgba(255,100,120,.08)
+        - border: 1px solid rgba(255,100,120,.16)
+      name:
+        - justify-self: start
+        - font-size: 20px
+        - font-weight: 950
+        - color: var(--primary-text-color)
+      label:
+        - justify-self: stretch
+        - text-align: left
+        - color: var(--primary-text-color)
+        - white-space: normal
+
+  - type: custom:expander-card
+    expanded: false
+    expand-id: withings-cardiovascular
+    clear: true
+    clear-children: true
+    gap: 8px
+    padding: 0
+    child-padding: 0
+    title-card-button-overlay: true
+    overlay-margin: 18px
+    title-card:
+      type: custom:button-card
+      show_icon: true
+      icon: mdi:heart-cog
+      name: Kärl & puls
+      show_state: false
+      show_label: true
+      label: Trender
+      styles:
+        card:
+          - padding: 14px 48px 14px 16px
+          - border-radius: 18px
+          - background: var(--ha-card-background, var(--card-background-color))
+          - box-shadow: 0 2px 10px rgba(0,0,0,.06)
+          - border: 1px solid var(--divider-color)
+        grid:
+          - grid-template-areas: '"l i" "n i"'
+          - grid-template-columns: 1fr 34px
+          - grid-template-rows: min-content min-content
+        icon:
+          - width: 22px
+          - color: var(--secondary-text-color)
+        img_cell:
+          - justify-self: end
+        name:
+          - justify-self: end
+          - font-size: 18px
+          - font-weight: 950
+          - color: var(--primary-text-color)
+        label:
+          - justify-self: end
+          - font-size: 10px
+          - font-weight: 950
+          - letter-spacing: .95px
+          - text-transform: uppercase
+          - color: var(--secondary-text-color)
+    cards:
+      - type: statistics-graph
+        title: 30 dagar
+        chart_type: line
+        days_to_show: 30
+        period: day
+        stat_types:
+          - mean
+        entities:
+          - entity: sensor.withings_pulsvagens_hastighet
+            name: PWV
+          - entity: sensor.withings_vaskular_alder
+            name: Vaskulär ålder
+          - entity: sensor.withings_hjartpuls
+            name: Puls
+      - type: statistics-graph
+        title: 12 månader
+        chart_type: line
+        days_to_show: 365
+        period: month
+        stat_types:
+          - mean
+        entities:
+          - entity: sensor.withings_pulsvagens_hastighet
+            name: PWV
+          - entity: sensor.withings_vaskular_alder
+            name: Vaskulär ålder
+          - entity: sensor.withings_hjartpuls
+            name: Puls
+
+  - type: custom:expander-card
+    expanded: false
+    expand-id: withings-water
+    clear: true
+    clear-children: true
+    gap: 8px
+    padding: 0
+    child-padding: 0
+    title-card-button-overlay: true
+    overlay-margin: 18px
+    title-card:
+      type: custom:button-card
+      show_icon: true
+      icon: mdi:water
+      name: Kroppsvätska
+      show_state: false
+      show_label: true
+      label: ICW / ECW
+      styles:
+        card:
+          - padding: 14px 48px 14px 16px
+          - border-radius: 18px
+          - background: var(--ha-card-background, var(--card-background-color))
+          - box-shadow: 0 2px 10px rgba(0,0,0,.06)
+          - border: 1px solid var(--divider-color)
+        grid:
+          - grid-template-areas: '"l i" "n i"'
+          - grid-template-columns: 1fr 34px
+          - grid-template-rows: min-content min-content
+        icon:
+          - width: 22px
+          - color: var(--secondary-text-color)
+        img_cell:
+          - justify-self: end
+        name:
+          - justify-self: end
+          - font-size: 18px
+          - font-weight: 950
+          - color: var(--primary-text-color)
+        label:
+          - justify-self: end
+          - font-size: 10px
+          - font-weight: 950
+          - letter-spacing: .95px
+          - text-transform: uppercase
+          - color: var(--secondary-text-color)
+    cards:
+      - type: custom:button-card
+        show_icon: false
+        show_name: false
+        show_state: false
+        styles:
+          card:
+            - padding: 14px
+            - border-radius: 18px
+            - background: var(--ha-card-background, var(--card-background-color))
+            - border: 1px solid var(--divider-color)
+            - box-shadow: none
+        custom_fields:
+          water: |
+            [[[
+              const invalid = ['unknown','unavailable','none','None',''];
+              const n = (id) => {
+                const s = states[id]?.state;
+                const v = parseFloat(s);
+                return s !== undefined && !invalid.includes(String(s)) && Number.isFinite(v) ? v : null;
+              };
+              const total = n('sensor.withings_hydrering');
+              const icw = n('sensor.ovrigt_withings_intracellulart_vatten');
+              const ecw = n('sensor.ovrigt_withings_extracellulart_vatten');
+              const pct = (v) => total && v !== null ? ((v / total) * 100).toFixed(1) + '%' : '—';
+              const kg = (v) => v === null ? '—' : v.toFixed(2) + ' kg';
+              const tile = (title, value, share, accent) => `
+                <div style="padding:12px;border-radius:16px;background:rgba(${accent},.08);border:1px solid rgba(${accent},.16);">
+                  <div style="font-size:10px;font-weight:950;text-transform:uppercase;letter-spacing:.7px;color:var(--secondary-text-color);">${title}</div>
+                  <div style="font-size:21px;font-weight:950;color:var(--primary-text-color);margin-top:5px;">${value}</div>
+                  <div style="font-size:11px;font-weight:800;color:var(--secondary-text-color);margin-top:3px;">${share}</div>
+                </div>`;
+              return `
+                <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;width:100%;">
+                  ${tile('Total',kg(total),'TBW','80,170,255')}
+                  ${tile('ICW',kg(icw),pct(icw) + ' av TBW','90,210,255')}
+                  ${tile('ECW',kg(ecw),pct(ecw) + ' av TBW','90,190,215')}
+                </div>`;
+            ]]]
+        extra_styles: |
+          #water { width: 100%; }
+
+      - type: statistics-graph
+        title: Kroppsvätska · 30 dagar
+        chart_type: line
+        days_to_show: 30
+        period: day
+        stat_types:
+          - mean
+        entities:
+          - entity: sensor.ovrigt_withings_intracellulart_vatten
+            name: ICW
+          - entity: sensor.ovrigt_withings_extracellulart_vatten
+            name: ECW
+          - entity: sensor.withings_hydrering
+            name: Total
+
+  - type: custom:expander-card
+    expanded: false
+    expand-id: withings-workout
+    clear: true
+    clear-children: true
+    gap: 8px
+    padding: 0
+    child-padding: 0
+    title-card-button-overlay: true
+    overlay-margin: 18px
+    title-card:
+      type: custom:button-card
+      show_icon: true
+      icon: mdi:run
+      name: Senaste träningspasset
+      show_state: false
+      show_label: true
+      label: Withings aktivitet
+      styles:
+        card:
+          - padding: 14px 48px 14px 16px
+          - border-radius: 18px
+          - background: var(--ha-card-background, var(--card-background-color))
+          - box-shadow: 0 2px 10px rgba(0,0,0,.06)
+          - border: 1px solid var(--divider-color)
+        grid:
+          - grid-template-areas: '"l i" "n i"'
+          - grid-template-columns: 1fr 34px
+          - grid-template-rows: min-content min-content
+        icon:
+          - width: 22px
+          - color: var(--secondary-text-color)
+        img_cell:
+          - justify-self: end
+        name:
+          - justify-self: end
+          - font-size: 18px
+          - font-weight: 950
+          - color: var(--primary-text-color)
+        label:
+          - justify-self: end
+          - font-size: 10px
+          - font-weight: 950
+          - letter-spacing: .95px
+          - text-transform: uppercase
+          - color: var(--secondary-text-color)
+    cards:
+      - type: custom:button-card
+        show_icon: false
+        show_name: false
+        show_state: false
+        styles:
+          card:
+            - padding: 14px
+            - border-radius: 18px
+            - background: var(--ha-card-background, var(--card-background-color))
+            - border: 1px solid var(--divider-color)
+            - box-shadow: none
+        custom_fields:
+          workout: |
+            [[[
+              const invalid = ['unknown','unavailable','none','None',''];
+              const raw = (id) => {
+                const s = states[id]?.state;
+                return s !== undefined && !invalid.includes(String(s)) ? String(s) : null;
+              };
+              const n = (id) => {
+                const v = parseFloat(raw(id));
+                return Number.isFinite(v) ? v : null;
+              };
+              const typeRaw = raw('sensor.withings_typ_pa_senaste_traningspasset');
+              const typeMap = { walk:'Promenad', run:'Löpning', cycling:'Cykling', swim:'Simning' };
+              const type = typeRaw ? (typeMap[typeRaw] || typeRaw) : '—';
+              const duration = n('sensor.withings_langd_tid_for_senaste_traningspasset');
+              const distance = n('sensor.withings_tillryggalagd_stracka_senaste_traningspasset');
+              const calories = n('sensor.withings_forbranda_kalorier_senaste_traningspasset');
+              const intensity = n('sensor.withings_intensitet_for_senaste_traningspasset');
+              const elevation = n('sensor.withings_elevation_change_last_workout');
+              const pause = n('sensor.withings_paus_tid_under_senaste_traningspasset');
+              const fmt = (v, unit = '', d = 0) => v === null ? '—' : v.toFixed(d) + unit;
+              const item = (icon, title, value) => `
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 11px;border-radius:15px;background:rgba(120,150,190,.06);border:1px solid var(--divider-color);">
+                  <div style="display:flex;align-items:center;gap:8px;color:var(--secondary-text-color);font-size:11px;font-weight:850;">
+                    <ha-icon icon="${icon}" style="width:17px;height:17px;"></ha-icon>${title}
+                  </div>
+                  <div style="font-size:13px;font-weight:950;color:var(--primary-text-color);text-align:right;">${value}</div>
+                </div>`;
+              return `
+                <div style="display:flex;flex-direction:column;gap:8px;width:100%;">
+                  <div style="font-size:22px;font-weight:950;color:var(--primary-text-color);padding:2px 2px 6px 2px;">${type}</div>
+                  ${item('mdi:timer-outline','Tid',fmt(duration,' min',1))}
+                  ${item('mdi:map-marker-distance','Sträcka',fmt(distance,' m',0))}
+                  ${item('mdi:fire','Kalorier',fmt(calories,' kcal',0))}
+                  ${item('mdi:speedometer','Intensitet',fmt(intensity,'',0))}
+                  ${item('mdi:elevation-rise','Höjdförändring',fmt(elevation,' m',0))}
+                  ${item('mdi:pause-circle-outline','Paus',fmt(pause,' min',1))}
+                </div>`;
+            ]]]
+        extra_styles: |
+          #workout { width: 100%; }
+
+  - type: custom:expander-card
+    expanded: false
+    expand-id: withings-goals-devices
+    clear: true
+    clear-children: true
+    gap: 8px
+    padding: 0
+    child-padding: 0
+    title-card-button-overlay: true
+    overlay-margin: 18px
+    title-card:
+      type: custom:button-card
+      show_icon: true
+      icon: mdi:target
+      name: Mål & enheter
+      show_state: false
+      show_label: true
+      label: Withings ekosystem
+      styles:
+        card:
+          - padding: 14px 48px 14px 16px
+          - border-radius: 18px
+          - background: var(--ha-card-background, var(--card-background-color))
+          - box-shadow: 0 2px 10px rgba(0,0,0,.06)
+          - border: 1px solid var(--divider-color)
+        grid:
+          - grid-template-areas: '"l i" "n i"'
+          - grid-template-columns: 1fr 34px
+          - grid-template-rows: min-content min-content
+        icon:
+          - width: 22px
+          - color: var(--secondary-text-color)
+        img_cell:
+          - justify-self: end
+        name:
+          - justify-self: end
+          - font-size: 18px
+          - font-weight: 950
+          - color: var(--primary-text-color)
+        label:
+          - justify-self: end
+          - font-size: 10px
+          - font-weight: 950
+          - letter-spacing: .95px
+          - text-transform: uppercase
+          - color: var(--secondary-text-color)
+    cards:
+      - type: custom:button-card
+        show_icon: false
+        show_name: false
+        show_state: false
+        styles:
+          card:
+            - padding: 14px
+            - border-radius: 18px
+            - background: var(--ha-card-background, var(--card-background-color))
+            - border: 1px solid var(--divider-color)
+            - box-shadow: none
+        custom_fields:
+          devices: |
+            [[[
+              const invalid = ['unknown','unavailable','none','None',''];
+              const raw = (id) => {
+                const s = states[id]?.state;
+                return s !== undefined && !invalid.includes(String(s)) ? String(s) : null;
+              };
+              const n = (id) => {
+                const v = parseFloat(raw(id));
+                return Number.isFinite(v) ? v : null;
+              };
+              const batterySv = (v) => ({high:'Hög',medium:'Medel',low:'Låg',full:'Full'}[v] || (v ?? '—'));
+              const fmt = (v, unit = '', d = 1) => v === null ? '—' : v.toFixed(d) + unit;
+              const item = (icon, title, value, sub = '') => `
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 12px;border-radius:16px;background:rgba(120,150,190,.06);border:1px solid var(--divider-color);">
+                  <div style="display:flex;align-items:center;gap:9px;min-width:0;">
+                    <ha-icon icon="${icon}" style="width:18px;height:18px;color:var(--secondary-text-color);"></ha-icon>
+                    <div>
+                      <div style="font-size:12px;font-weight:950;color:var(--primary-text-color);">${title}</div>
+                      ${sub ? `<div style="font-size:10px;font-weight:750;color:var(--secondary-text-color);margin-top:2px;">${sub}</div>` : ''}
+                    </div>
+                  </div>
+                  <div style="font-size:13px;font-weight:950;color:var(--primary-text-color);text-align:right;white-space:nowrap;">${value}</div>
+                </div>`;
+              const weightGoal = n('sensor.withings_viktmal');
+              const stepGoal = n('sensor.withings_stegmal');
+              const bodyfitBattery = raw('sensor.withings_bodyfit_batteri');
+              return `
+                <div style="display:flex;flex-direction:column;gap:8px;width:100%;">
+                  ${item('mdi:scale-bathroom','Viktmål',fmt(weightGoal,' kg',1))}
+                  ${item('mdi:walk','Stegmål',fmt(stepGoal,' steg',0))}
+                  ${item('mdi:battery','BodyFit batteri',batterySv(bodyfitBattery),'Withings BodyFit')}
+                </div>`;
+            ]]]
+        extra_styles: |
+          #devices { width: 100%; }
+
+  - type: custom:button-card
+    show_icon: false
+    show_name: false
+    show_state: false
+    styles:
+      card:
+        - padding: 10px 14px 14px 14px
+        - border-radius: 0 0 28px 28px
+        - background: transparent
+        - box-shadow: none
+        - border-top: 1px solid var(--divider-color)
+    custom_fields:
+      footer: |
+        [[[
+          return `
+            <div style="font-size:10px;line-height:1.35;color:var(--secondary-text-color);font-weight:750;">
+              Kroppssammansättning och segmentdata ligger fortsatt i det separata BodyFit-kortet.
+            </div>`;
+        ]]]
+    extra_styles: |
+      #footer { width: 100%; }
