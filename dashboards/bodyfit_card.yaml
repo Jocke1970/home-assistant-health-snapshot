@@ -86,302 +86,446 @@ cards:
         - color: white
         - white-space: normal
 
-  - type: custom:button-card
-    show_icon: false
-    show_name: false
-    show_state: false
-    styles:
-      card:
-        - padding: 14px 14px 8px 14px
-        - border-radius: 0
-        - background: rgba(5,8,18,.94)
-        - box-shadow: none
-    custom_fields:
-      title: |
-        [[[
-          return `
-            <div style="display:flex;justify-content:space-between;align-items:center;width:100%;">
-              <div>
-                <div style="font-size:10px;text-transform:uppercase;letter-spacing:.95px;color:rgba(255,255,255,.50);font-weight:950;">Segmental analys</div>
-                <div style="font-size:18px;font-weight:950;color:white;margin-top:3px;">Muskelmassa per kroppsdel</div>
-              </div>
-              <ha-icon icon="mdi:human-handsup" style="width:25px;height:25px;color:rgba(255,255,255,.56);"></ha-icon>
-            </div>`;
-        ]]]
-    extra_styles: |
-      #title { width: 100%; }
-
-  - type: picture-elements
-    image:
-      media_content_id: media-source://image_upload/8ba6a44c2588f3ab0e576a156f39cb82
-      media_content_type: image/png
-      metadata:
-        title: Human_:body.png
-        thumbnail: /api/image/serve/8ba6a44c2588f3ab0e576a156f39cb82/256x256
-        media_class: image
-        navigateIds:
-          - {}
-          - media_content_type: app
-            media_content_id: media-source://image_upload
-    elements:
-      - type: state-label
-        entity: sensor.ovrigt_withings_muskelmassa_i_hoger_arm
-        prefix: "H arm "
-        style:
-          left: 20%
-          top: 32%
-          transform: translate(-50%, -50%)
-          color: white
-          background: rgba(0, 0, 0, 0.62)
-          border-radius: 12px
-          padding: 5px 8px
-          font-size: 12px
-          font-weight: 600
-          white-space: nowrap
-      - type: state-label
-        entity: sensor.ovrigt_withings_muskelmassa_i_vanster_arm
-        prefix: "V arm "
-        style:
-          left: 80%
-          top: 32%
-          transform: translate(-50%, -50%)
-          color: white
-          background: rgba(0, 0, 0, 0.62)
-          border-radius: 12px
-          padding: 5px 8px
-          font-size: 12px
-          font-weight: 600
-          white-space: nowrap
-      - type: state-label
-        entity: sensor.ovrigt_withings_muskelmassa_i_balen
-        prefix: "Bål "
-        style:
-          left: 50%
-          top: 42%
-          transform: translate(-50%, -50%)
-          color: white
-          background: rgba(0, 0, 0, 0.68)
-          border-radius: 12px
-          padding: 5px 9px
-          font-size: 13px
-          font-weight: 600
-          white-space: nowrap
-      - type: state-label
-        entity: sensor.ovrigt_withings_muskelmassa_i_hoger_ben
-        prefix: "H ben "
-        style:
-          left: 39%
-          top: 68%
-          transform: translate(-50%, -50%)
-          color: white
-          background: rgba(0, 0, 0, 0.62)
-          border-radius: 12px
-          padding: 5px 8px
-          font-size: 12px
-          font-weight: 600
-          white-space: nowrap
-      - type: state-label
-        entity: sensor.ovrigt_withings_muskelmassa_i_vanster_ben
-        prefix: "V ben "
-        style:
-          left: 61%
-          top: 68%
-          transform: translate(-50%, -50%)
-          color: white
-          background: rgba(0, 0, 0, 0.62)
-          border-radius: 12px
-          padding: 5px 8px
-          font-size: 12px
-          font-weight: 600
-          white-space: nowrap
-
-  - type: custom:button-card
-    show_icon: false
-    show_name: false
-    show_state: false
-    styles:
-      card:
-        - padding: 14px 14px 8px 14px
-        - border-radius: 0
-        - background: rgba(5,8,18,.94)
-        - box-shadow: none
-    custom_fields:
-      title: |
-        [[[
-          return `
-            <div style="display:flex;justify-content:space-between;align-items:center;width:100%;">
-              <div>
-                <div style="font-size:10px;text-transform:uppercase;letter-spacing:.95px;color:rgba(255,255,255,.50);font-weight:950;">Förändring</div>
-                <div style="font-size:18px;font-weight:950;color:white;margin-top:3px;">30 dagar</div>
-              </div>
-              <ha-icon icon="mdi:chart-timeline-variant" style="width:25px;height:25px;color:rgba(255,255,255,.56);"></ha-icon>
-            </div>`;
-        ]]]
-    extra_styles: |
-      #title { width: 100%; }
-
-  - type: grid
-    columns: 2
-    square: false
+  - type: custom:expander-card
+    expanded: false
+    expand-id: bodyfit-segmental
+    clear: true
+    clear-children: true
+    gap: 0
+    padding: 0
+    child-padding: 0
+    title-card-button-overlay: true
+    overlay-margin: 18px
+    title-card:
+      type: custom:button-card
+      show_icon: true
+      icon: mdi:human-handsup
+      name: Muskelmassa per kroppsdel
+      show_state: false
+      show_label: true
+      label: Segmental analys
+      styles:
+        card:
+          - padding: 14px 48px 14px 16px
+          - border-radius: 0
+          - background: rgba(5,8,18,.97)
+          - box-shadow: none
+          - border-top: 1px solid rgba(255,255,255,.10)
+          - border-bottom: 1px solid rgba(255,255,255,.07)
+        grid:
+          - grid-template-areas: '"l i" "n i"'
+          - grid-template-columns: 1fr 34px
+          - grid-template-rows: min-content min-content
+        icon:
+          - width: 22px
+          - color: rgba(255,255,255,.56)
+        img_cell:
+          - justify-self: end
+        name:
+          - justify-self: end
+          - font-size: 18px
+          - font-weight: 950
+          - color: white
+        label:
+          - justify-self: end
+          - font-size: 10px
+          - font-weight: 950
+          - letter-spacing: .95px
+          - text-transform: uppercase
+          - color: rgba(255,255,255,.50)
     cards:
-      - type: statistic
-        entity: sensor.health_snapshot_bodyfit_weight
-        name: Vikt Δ30d
-        icon: mdi:scale-bathroom
-        stat_type: change
-        period:
-          rolling_window:
-            duration:
-              days: 30
-      - type: statistic
-        entity: sensor.health_snapshot_bodyfit_fat_percentage
-        name: Fett Δ30d
-        icon: mdi:water-percent
-        stat_type: change
-        period:
-          rolling_window:
-            duration:
-              days: 30
-      - type: statistic
-        entity: sensor.health_snapshot_bodyfit_muscle_mass
-        name: Muskel Δ30d
-        icon: mdi:arm-flex
-        stat_type: change
-        period:
-          rolling_window:
-            duration:
-              days: 30
-      - type: statistic
-        entity: sensor.health_snapshot_bodyfit_visceral_fat
-        name: Visceralt Δ30d
-        icon: mdi:stomach
-        stat_type: change
-        period:
-          rolling_window:
-            duration:
-              days: 30
+      - type: picture-elements
+        image:
+          media_content_id: media-source://image_upload/8ba6a44c2588f3ab0e576a156f39cb82
+          media_content_type: image/png
+          metadata:
+            title: Human_:body.png
+            thumbnail: /api/image/serve/8ba6a44c2588f3ab0e576a156f39cb82/256x256
+            media_class: image
+            navigateIds:
+              - {}
+              - media_content_type: app
+                media_content_id: media-source://image_upload
+        elements:
+          - type: state-label
+            entity: sensor.ovrigt_withings_muskelmassa_i_hoger_arm
+            prefix: "H arm "
+            style:
+              left: 20%
+              top: 32%
+              transform: translate(-50%, -50%)
+              color: white
+              background: rgba(0, 0, 0, 0.62)
+              border-radius: 12px
+              padding: 5px 8px
+              font-size: 12px
+              font-weight: 600
+              white-space: nowrap
+          - type: state-label
+            entity: sensor.ovrigt_withings_muskelmassa_i_vanster_arm
+            prefix: "V arm "
+            style:
+              left: 80%
+              top: 32%
+              transform: translate(-50%, -50%)
+              color: white
+              background: rgba(0, 0, 0, 0.62)
+              border-radius: 12px
+              padding: 5px 8px
+              font-size: 12px
+              font-weight: 600
+              white-space: nowrap
+          - type: state-label
+            entity: sensor.ovrigt_withings_muskelmassa_i_balen
+            prefix: "Bål "
+            style:
+              left: 50%
+              top: 42%
+              transform: translate(-50%, -50%)
+              color: white
+              background: rgba(0, 0, 0, 0.68)
+              border-radius: 12px
+              padding: 5px 9px
+              font-size: 13px
+              font-weight: 600
+              white-space: nowrap
+          - type: state-label
+            entity: sensor.ovrigt_withings_muskelmassa_i_hoger_ben
+            prefix: "H ben "
+            style:
+              left: 39%
+              top: 68%
+              transform: translate(-50%, -50%)
+              color: white
+              background: rgba(0, 0, 0, 0.62)
+              border-radius: 12px
+              padding: 5px 8px
+              font-size: 12px
+              font-weight: 600
+              white-space: nowrap
+          - type: state-label
+            entity: sensor.ovrigt_withings_muskelmassa_i_vanster_ben
+            prefix: "V ben "
+            style:
+              left: 61%
+              top: 68%
+              transform: translate(-50%, -50%)
+              color: white
+              background: rgba(0, 0, 0, 0.62)
+              border-radius: 12px
+              padding: 5px 8px
+              font-size: 12px
+              font-weight: 600
+              white-space: nowrap
 
-  - type: custom:button-card
-    show_icon: false
-    show_name: false
-    show_state: false
-    styles:
-      card:
-        - padding: 14px 14px 8px 14px
-        - border-radius: 0
-        - background: rgba(5,8,18,.94)
-        - box-shadow: none
-    custom_fields:
-      title: |
-        [[[
-          return `
-            <div style="display:flex;justify-content:space-between;align-items:center;width:100%;">
-              <div>
-                <div style="font-size:10px;text-transform:uppercase;letter-spacing:.95px;color:rgba(255,255,255,.50);font-weight:950;">Förändring</div>
-                <div style="font-size:18px;font-weight:950;color:white;margin-top:3px;">90 dagar</div>
-              </div>
-              <ha-icon icon="mdi:calendar-range" style="width:25px;height:25px;color:rgba(255,255,255,.56);"></ha-icon>
-            </div>`;
-        ]]]
-    extra_styles: |
-      #title { width: 100%; }
-
-  - type: grid
-    columns: 2
-    square: false
+  - type: custom:expander-card
+    expanded: false
+    expand-id: bodyfit-change
+    clear: true
+    clear-children: true
+    gap: 8px
+    padding: 0
+    child-padding: 0
+    title-card-button-overlay: true
+    overlay-margin: 18px
+    title-card:
+      type: custom:button-card
+      show_icon: true
+      icon: mdi:chart-timeline-variant
+      name: 30 / 90 dagar
+      show_state: false
+      show_label: true
+      label: Förändring
+      styles:
+        card:
+          - padding: 14px 48px 14px 16px
+          - border-radius: 0
+          - background: rgba(5,8,18,.97)
+          - box-shadow: none
+          - border-top: 1px solid rgba(255,255,255,.10)
+          - border-bottom: 1px solid rgba(255,255,255,.07)
+        grid:
+          - grid-template-areas: '"l i" "n i"'
+          - grid-template-columns: 1fr 34px
+          - grid-template-rows: min-content min-content
+        icon:
+          - width: 22px
+          - color: rgba(255,255,255,.56)
+        img_cell:
+          - justify-self: end
+        name:
+          - justify-self: end
+          - font-size: 18px
+          - font-weight: 950
+          - color: white
+        label:
+          - justify-self: end
+          - font-size: 10px
+          - font-weight: 950
+          - letter-spacing: .95px
+          - text-transform: uppercase
+          - color: rgba(255,255,255,.50)
     cards:
-      - type: statistic
-        entity: sensor.health_snapshot_bodyfit_weight
-        name: Vikt Δ90d
-        icon: mdi:scale-bathroom
-        stat_type: change
-        period:
-          rolling_window:
-            duration:
-              days: 90
-      - type: statistic
-        entity: sensor.health_snapshot_bodyfit_fat_percentage
-        name: Fett Δ90d
-        icon: mdi:water-percent
-        stat_type: change
-        period:
-          rolling_window:
-            duration:
-              days: 90
-      - type: statistic
-        entity: sensor.health_snapshot_bodyfit_muscle_mass
-        name: Muskel Δ90d
-        icon: mdi:arm-flex
-        stat_type: change
-        period:
-          rolling_window:
-            duration:
-              days: 90
-      - type: statistic
-        entity: sensor.health_snapshot_bodyfit_visceral_fat
-        name: Visceralt Δ90d
-        icon: mdi:stomach
-        stat_type: change
-        period:
-          rolling_window:
-            duration:
-              days: 90
+      - type: custom:button-card
+        show_icon: false
+        show_name: true
+        name: 30 dagar
+        styles:
+          card:
+            - padding: 10px 14px 6px 14px
+            - border-radius: 0
+            - background: transparent
+            - box-shadow: none
+          name:
+            - justify-self: start
+            - font-size: 13px
+            - font-weight: 950
+            - color: rgba(255,255,255,.72)
+      - type: grid
+        columns: 2
+        square: false
+        cards:
+          - type: statistic
+            entity: sensor.health_snapshot_bodyfit_weight
+            name: Vikt Δ30d
+            icon: mdi:scale-bathroom
+            stat_type: change
+            period:
+              rolling_window:
+                duration:
+                  days: 30
+          - type: statistic
+            entity: sensor.health_snapshot_bodyfit_fat_percentage
+            name: Fett Δ30d
+            icon: mdi:water-percent
+            stat_type: change
+            period:
+              rolling_window:
+                duration:
+                  days: 30
+          - type: statistic
+            entity: sensor.health_snapshot_bodyfit_muscle_mass
+            name: Muskel Δ30d
+            icon: mdi:arm-flex
+            stat_type: change
+            period:
+              rolling_window:
+                duration:
+                  days: 30
+          - type: statistic
+            entity: sensor.health_snapshot_bodyfit_visceral_fat
+            name: Visceralt Δ30d
+            icon: mdi:stomach
+            stat_type: change
+            period:
+              rolling_window:
+                duration:
+                  days: 30
+      - type: custom:button-card
+        show_icon: false
+        show_name: true
+        name: 90 dagar
+        styles:
+          card:
+            - padding: 12px 14px 6px 14px
+            - border-radius: 0
+            - background: transparent
+            - box-shadow: none
+          name:
+            - justify-self: start
+            - font-size: 13px
+            - font-weight: 950
+            - color: rgba(255,255,255,.72)
+      - type: grid
+        columns: 2
+        square: false
+        cards:
+          - type: statistic
+            entity: sensor.health_snapshot_bodyfit_weight
+            name: Vikt Δ90d
+            icon: mdi:scale-bathroom
+            stat_type: change
+            period:
+              rolling_window:
+                duration:
+                  days: 90
+          - type: statistic
+            entity: sensor.health_snapshot_bodyfit_fat_percentage
+            name: Fett Δ90d
+            icon: mdi:water-percent
+            stat_type: change
+            period:
+              rolling_window:
+                duration:
+                  days: 90
+          - type: statistic
+            entity: sensor.health_snapshot_bodyfit_muscle_mass
+            name: Muskel Δ90d
+            icon: mdi:arm-flex
+            stat_type: change
+            period:
+              rolling_window:
+                duration:
+                  days: 90
+          - type: statistic
+            entity: sensor.health_snapshot_bodyfit_visceral_fat
+            name: Visceralt Δ90d
+            icon: mdi:stomach
+            stat_type: change
+            period:
+              rolling_window:
+                duration:
+                  days: 90
 
-  - type: statistics-graph
-    title: Kroppsmassa · 30 dagar
-    chart_type: line
-    days_to_show: 30
-    period: day
-    stat_types:
-      - mean
-    entities:
-      - entity: sensor.health_snapshot_bodyfit_weight
-        name: Vikt
-      - entity: sensor.health_snapshot_bodyfit_muscle_mass
-        name: Muskel
-      - entity: sensor.health_snapshot_bodyfit_fat_mass
-        name: Fettmassa
+  - type: custom:expander-card
+    expanded: false
+    expand-id: bodyfit-trend-30d
+    clear: true
+    clear-children: true
+    gap: 8px
+    padding: 0
+    child-padding: 0
+    title-card-button-overlay: true
+    overlay-margin: 18px
+    title-card:
+      type: custom:button-card
+      show_icon: true
+      icon: mdi:chart-line
+      name: 30 dagar
+      show_state: false
+      show_label: true
+      label: Trender
+      styles:
+        card:
+          - padding: 14px 48px 14px 16px
+          - border-radius: 0
+          - background: rgba(5,8,18,.97)
+          - box-shadow: none
+          - border-top: 1px solid rgba(255,255,255,.10)
+          - border-bottom: 1px solid rgba(255,255,255,.07)
+        grid:
+          - grid-template-areas: '"l i" "n i"'
+          - grid-template-columns: 1fr 34px
+          - grid-template-rows: min-content min-content
+        icon:
+          - width: 22px
+          - color: rgba(255,255,255,.56)
+        img_cell:
+          - justify-self: end
+        name:
+          - justify-self: end
+          - font-size: 18px
+          - font-weight: 950
+          - color: white
+        label:
+          - justify-self: end
+          - font-size: 10px
+          - font-weight: 950
+          - letter-spacing: .95px
+          - text-transform: uppercase
+          - color: rgba(255,255,255,.50)
+    cards:
+      - type: statistics-graph
+        title: Kroppsmassa
+        chart_type: line
+        days_to_show: 30
+        period: day
+        stat_types:
+          - mean
+        entities:
+          - entity: sensor.health_snapshot_bodyfit_weight
+            name: Vikt
+          - entity: sensor.health_snapshot_bodyfit_muscle_mass
+            name: Muskel
+          - entity: sensor.health_snapshot_bodyfit_fat_mass
+            name: Fettmassa
+      - type: statistics-graph
+        title: Kroppssammansättning
+        chart_type: line
+        days_to_show: 30
+        period: day
+        stat_types:
+          - mean
+        entities:
+          - entity: sensor.health_snapshot_bodyfit_fat_percentage
+            name: Fett %
+          - entity: sensor.health_snapshot_bodyfit_water_percentage
+            name: Vätska %
 
-  - type: statistics-graph
-    title: Kroppssammansättning · 30 dagar
-    chart_type: line
-    days_to_show: 30
-    period: day
-    stat_types:
-      - mean
-    entities:
-      - entity: sensor.health_snapshot_bodyfit_fat_percentage
-        name: Fett %
-      - entity: sensor.health_snapshot_bodyfit_water_percentage
-        name: Vätska %
-
-  - type: statistics-graph
-    title: Kroppsmassa · 12 månader
-    chart_type: line
-    days_to_show: 365
-    period: month
-    stat_types:
-      - mean
-    entities:
-      - entity: sensor.health_snapshot_bodyfit_weight
-        name: Vikt
-      - entity: sensor.health_snapshot_bodyfit_muscle_mass
-        name: Muskel
-      - entity: sensor.health_snapshot_bodyfit_fat_mass
-        name: Fettmassa
-
-  - type: statistics-graph
-    title: Kroppssammansättning · 12 månader
-    chart_type: line
-    days_to_show: 365
-    period: month
-    stat_types:
-      - mean
-    entities:
-      - entity: sensor.health_snapshot_bodyfit_fat_percentage
-        name: Fett %
-      - entity: sensor.health_snapshot_bodyfit_water_percentage
-        name: Vätska %
+  - type: custom:expander-card
+    expanded: false
+    expand-id: bodyfit-trend-12m
+    clear: true
+    clear-children: true
+    gap: 8px
+    padding: 0
+    child-padding: 0
+    title-card-button-overlay: true
+    overlay-margin: 18px
+    title-card:
+      type: custom:button-card
+      show_icon: true
+      icon: mdi:calendar-range
+      name: 12 månader
+      show_state: false
+      show_label: true
+      label: Trender
+      styles:
+        card:
+          - padding: 14px 48px 14px 16px
+          - border-radius: 0
+          - background: rgba(5,8,18,.97)
+          - box-shadow: none
+          - border-top: 1px solid rgba(255,255,255,.10)
+          - border-bottom: 1px solid rgba(255,255,255,.07)
+        grid:
+          - grid-template-areas: '"l i" "n i"'
+          - grid-template-columns: 1fr 34px
+          - grid-template-rows: min-content min-content
+        icon:
+          - width: 22px
+          - color: rgba(255,255,255,.56)
+        img_cell:
+          - justify-self: end
+        name:
+          - justify-self: end
+          - font-size: 18px
+          - font-weight: 950
+          - color: white
+        label:
+          - justify-self: end
+          - font-size: 10px
+          - font-weight: 950
+          - letter-spacing: .95px
+          - text-transform: uppercase
+          - color: rgba(255,255,255,.50)
+    cards:
+      - type: statistics-graph
+        title: Kroppsmassa
+        chart_type: line
+        days_to_show: 365
+        period: month
+        stat_types:
+          - mean
+        entities:
+          - entity: sensor.health_snapshot_bodyfit_weight
+            name: Vikt
+          - entity: sensor.health_snapshot_bodyfit_muscle_mass
+            name: Muskel
+          - entity: sensor.health_snapshot_bodyfit_fat_mass
+            name: Fettmassa
+      - type: statistics-graph
+        title: Kroppssammansättning
+        chart_type: line
+        days_to_show: 365
+        period: month
+        stat_types:
+          - mean
+        entities:
+          - entity: sensor.health_snapshot_bodyfit_fat_percentage
+            name: Fett %
+          - entity: sensor.health_snapshot_bodyfit_water_percentage
+            name: Vätska %
 
   - type: custom:button-card
     show_icon: false
@@ -389,16 +533,17 @@ cards:
     show_state: false
     styles:
       card:
-        - padding: 12px 16px 16px 16px
+        - padding: 10px 14px 14px 14px
         - border-radius: 0 0 28px 28px
-        - background: rgba(5,8,18,.94)
+        - background: rgba(5,8,18,.97)
         - box-shadow: none
+        - border-top: 1px solid rgba(255,255,255,.07)
     custom_fields:
       footer: |
         [[[
           return `
-            <div style="padding:10px 12px;border-radius:16px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);font-size:11px;line-height:1.4;color:rgba(255,255,255,.58);font-weight:750;">
-              BodyFit-proxyerna startade sin rena trendhistorik 2026-10-03. 30/90-dagarsvärdena använder därför tillgänglig BodyFit-historik tills hela respektive tidsfönster hunnit fyllas.
+            <div style="font-size:10px;line-height:1.35;color:rgba(255,255,255,.50);font-weight:750;">
+              Ren BodyFit-historik från 2026-10-03 · 30/90 dagar använder tillgänglig historik tills tidsfönstret är fullt.
             </div>`;
         ]]]
     extra_styles: |
