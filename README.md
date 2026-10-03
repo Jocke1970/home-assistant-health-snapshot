@@ -57,7 +57,7 @@ sensor.health_snapshot_bodyfit_visceral_fat
 
 The water percentage entity is calculated as Withings hydration mass divided by current Withings body weight. All BodyFit proxy entities use `state_class: measurement` so Home Assistant can build long-term statistics for month/year graphs.
 
-For rolling 30/90-day change sensors, use Home Assistant's native **Statistics helper** against these BodyFit proxy entities. This keeps recorder/statistics logic in Home Assistant instead of duplicating it in the custom integration.
+For dashboard-only 30/90-day deltas, the bundled `dashboards/bodyfit_card.yaml` uses Home Assistant's native **Statistic card** directly against long-term statistics, so no extra helper entities are required. The same card includes 30-day daily trend graphs and 12-month monthly trend graphs. Create Statistics helpers only if you later need the rolling deltas as reusable entities for automations or other dashboards.
 
 ## Branch / release SOP
 
@@ -105,3 +105,22 @@ Withings:
 ## Notes
 
 The backend is intentionally local and lightweight. Version `2026.10.0b1` begins the BodyFit trend-history migration while retaining the existing YAML sensor-platform setup.
+
+
+## BodyFit dashboard
+
+A complete BodyFit dashboard card is available at:
+
+```text
+dashboards/bodyfit_card.yaml
+```
+
+It uses:
+
+- the eight BodyFit proxy entities for current values and long-term statistics
+- native Statistic cards for rolling 30-day and 90-day change
+- native Statistics Graph cards for 30-day and 12-month trends
+- the existing segmental muscle entities from Withings
+- the existing uploaded body image media-source reference used by the current dashboard
+
+The clean BodyFit trend history starts on 2026-10-03, so rolling windows initially represent the available post-migration history until the full 30/90-day windows have elapsed.
